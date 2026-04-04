@@ -1,0 +1,2651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX POS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══ AUTH ══════════════════════════════════ -->
+<div id="auth">
+  <div class="auth-card">
+    <div class="auth-top">
+      <div class="auth-logo-line">
+        <div class="auth-logo-name">APEX POS</div>
+        <div class="auth-logo-ver">v3.0</div>
+      </div>
+      <div class="auth-logo-sub">Point of Sale System</div>
+    </div>
+    <div class="auth-body">
+      <div class="fg"><label class="fl">Username</label><input class="fi" id="lu" value="admin" placeholder="username"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" type="password" id="lp" value="admin123" placeholder="••••••••"></div>
+      <div class="fg"><label class="fl">Role</label>
+        <select class="fsel" id="lr">
+          <option value="admin">Administrator</option>
+          <option value="manager">Manager</option>
+          <option value="cashier">Cashier</option>
+        </select>
+      </div>
+      <button class="auth-btn" onclick="login()">[ SIGN IN ]</button>
+      <div class="auth-hint">
+        <b>DEMO —</b> admin / admin123 &nbsp;|&nbsp; manager / mgr123 &nbsp;|&nbsp; cashier / cash123
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOASTS ════════════════════════════════ -->
+<div class="toasts" id="toasts"></div>
+
+<!-- ══ APP ═══════════════════════════════════ -->
+<div id="app">
+  <div class="bar">
+    <div class="bar-brand">
+      <div class="bar-brand-icon">A</div>
+      <div class="bar-brand-name">APEX POS</div>
+    </div>
+    <nav class="bar-nav" id="bar-nav">
+      <button class="bn" onclick="go('dashboard')" id="nav-dashboard" data-role="admin,manager">Dashboard</button>
+      <button class="bn on" onclick="go('pos')" id="nav-pos">Sales</button>
+      <button class="bn" onclick="go('products')" id="nav-products" data-role="admin,manager">Products</button>
+      <button class="bn" onclick="go('inventory')" id="nav-inventory" data-role="admin,manager">Inventory</button>
+      <button class="bn" onclick="go('customers')" id="nav-customers" data-role="admin,manager,cashier">Customers</button>
+      <button class="bn" onclick="go('reports')" id="nav-reports" data-role="admin,manager">Reports</button>
+      <button class="bn" onclick="go('users')" id="nav-users" data-role="admin">Users</button>
+    </nav>
+    <div class="bar-right">
+      <div class="bar-clock" id="clk">00:00:00</div>
+      <div class="bar-user">
+        <div class="bar-user-av" id="b-av">A</div>
+        <div><div class="bar-user-nm" id="b-nm">Admin</div><div class="bar-user-rl" id="b-rl">ADMIN</div></div>
+      </div>
+      <button class="bar-signout" onclick="logout()">SIGN OUT</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left">
+          <div class="ttl" id="dash-greeting">Good morning</div>
+          <div class="sub" id="dash-date">Loading...</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-o" onclick="go('pos')">Go to Sales →</button>
+          <button class="btn btn-a" onclick="openShiftSummary()">Close Shift</button>
+        </div>
+      </div>
+      <div class="admin-body">
+        <!-- KPI Row -->
+        <div class="sg">
+          <div class="sc g"><div class="sc-lbl">Today's Revenue</div><div class="sc-val" id="d-rev">GHS 0</div><div class="sc-sub" id="d-rev-sub">0 transactions</div></div>
+          <div class="sc b"><div class="sc-lbl">Items Sold Today</div><div class="sc-val" id="d-items">0</div><div class="sc-sub">units</div></div>
+          <div class="sc a"><div class="sc-lbl">Low Stock Alerts</div><div class="sc-val" id="d-low">0</div><div class="sc-sub">products need restocking</div></div>
+          <div class="sc r"><div class="sc-lbl">Out of Stock</div><div class="sc-val" id="d-out">0</div><div class="sc-sub">products unavailable</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <!-- Recent Sales -->
+          <div>
+            <div class="section-label">Recent Transactions</div>
+            <div class="tw">
+              <table class="dt">
+                <thead><tr><th>Time</th><th>Items</th><th>Method</th><th>Total</th></tr></thead>
+                <tbody id="d-sales-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <!-- Low Stock Alerts -->
+          <div>
+            <div class="section-label">⚠ Low Stock Alerts</div>
+            <div class="tw">
+              <table class="dt">
+                <thead><tr><th>Product</th><th>Category</th><th>In Stock</th><th>Alert At</th></tr></thead>
+                <tbody id="d-stock-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment breakdown -->
+        <div>
+          <div class="section-label">Today's Payment Breakdown</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+            <div class="dash-pay-card">
+              <div class="dash-pay-icon">💵</div>
+              <div class="dash-pay-lbl">Cash</div>
+              <div class="dash-pay-val" id="d-cash">GHS 0.00</div>
+            </div>
+            <div class="dash-pay-card">
+              <div class="dash-pay-icon">📱</div>
+              <div class="dash-pay-lbl">Mobile Money</div>
+              <div class="dash-pay-val" id="d-mobile">GHS 0.00</div>
+            </div>
+            <div class="dash-pay-card">
+              <div class="dash-pay-icon">💳</div>
+              <div class="dash-pay-lbl">Card</div>
+              <div class="dash-pay-val" id="d-card">GHS 0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POS -->
+  <div class="page on" id="page-pos">
+    <div class="pos">
+      <div class="pos-left">
+        <div class="pos-toolbar">
+          <div class="pos-search">
+            <span class="srch-ico">⌕</span>
+            <input type="text" id="ps" placeholder="Search products or scan barcode…" oninput="onSearchInput()" autocomplete="off">
+            <div id="scan-indicator" style="display:none;align-items:center;gap:5px;font-size:10px;color:var(--amber);letter-spacing:1px;white-space:nowrap;">
+              <span id="scan-dot" style="width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block;animation:blink 0.6s infinite;"></span>
+              SCANNING…
+            </div>
+          </div>
+          <button class="btn btn-o" id="cam-btn" onclick="openCamScanner()" title="Camera Barcode Scanner" style="display:flex;align-items:center;gap:6px;white-space:nowrap;padding:8px 14px;">
+            <span style="font-size:15px;">📷</span> SCAN
+          </button>
+        </div>
+        <div class="cats" id="cats"></div>
+        <div class="kbd-hints">
+          <span class="kbd-hint"><kbd>F2</kbd> Search</span>
+          <span class="kbd-hint"><kbd>F4</kbd> Camera scan</span>
+          <span class="kbd-hint"><kbd>F9</kbd> Checkout</span>
+          <span class="kbd-hint"><kbd>Esc</kbd> Clear search</span>
+        </div>
+        <div class="pgrid" id="pgrid"></div>
+      </div>
+      <div class="cart">
+        <div class="cart-hd">
+          <div class="cart-hd-left">
+            <span class="cart-hd-title">Current Order</span>
+            <span class="cart-count" id="cc">0</span>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <button class="btn btn-o btn-sm" onclick="holdSale()" title="Hold this sale and start a new one">Hold</button>
+            <button class="cart-clr" onclick="clrCart()">Clear</button>
+          </div>
+        </div>
+        <!-- Held sales strip -->
+        <div id="held-strip" style="display:none;padding:7px 14px;background:var(--amber-lt);border-bottom:1px solid var(--amber-bd);">
+          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:5px;letter-spacing:0.3px;">HELD SALES</div>
+          <div id="held-list" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        </div>
+        <div class="cart-items" id="citems">
+          <div class="cart-empty">
+            <div class="cart-empty-ico">▣</div>
+            <div class="cart-empty-txt">Cart empty</div>
+          </div>
+        </div>
+        <div class="cart-ft">
+          <div class="cart-cust">
+            <span class="cart-cust-lbl">Customer</span>
+            <select class="cart-cust-sel" id="cust-dd" onchange="onCustChange()"></select>
+          </div>
+          <div id="loyalty-strip" style="display:none;padding:6px 10px;background:var(--accent-lt);border-radius:var(--r-sm);border:1px solid var(--accent-bd);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;font-weight:600;color:var(--accent);">★ Loyalty Points</span>
+              <span style="font-size:13px;font-weight:800;color:var(--accent);" id="loyalty-pts">0 pts</span>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px;" id="loyalty-msg">Keep shopping to earn more!</div>
+          </div>
+          <div class="cart-disc">
+            <span class="cart-disc-lbl">Discount %</span>
+            <input type="number" class="cart-disc-in" id="disc" placeholder="0" min="0" max="100" oninput="updTot()">
+          </div>
+          <div class="totals">
+            <div class="tr"><span class="tr-lbl">Subtotal</span><span class="tr-val" id="t-sub">GHS 0.00</span></div>
+            <div class="tr disc"><span class="tr-lbl">Discount</span><span class="tr-val" id="t-dis">-GHS 0.00</span></div>
+            <div class="tr"><span class="tr-lbl">Tax (15%)</span><span class="tr-val" id="t-tax">GHS 0.00</span></div>
+            <div class="tr grand"><span class="tr-lbl">TOTAL</span><span class="tr-val" id="t-tot">GHS 0.00</span></div>
+            <div class="tr" id="t-chg-row" style="display:none;padding-top:5px;border-top:1px solid var(--wire2);margin-top:3px;"><span class="tr-lbl" style="color:var(--green);">CHANGE</span><span class="tr-val" id="t-chg" style="color:var(--green);">GHS 0.00</span></div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:7px;">Payment Method</div>
+            <div class="pmths">
+              <button class="pm sel" id="pm-cash" onclick="selPm('cash')">💵 Cash</button>
+              <button class="pm" id="pm-mobile" onclick="selPm('mobile')">📱 Mobile Money</button>
+              <button class="pm" id="pm-card" onclick="selPm('card')">💳 Card</button>
+            </div>
+          </div>
+
+          <!-- Cash: tendered amount -->
+          <div id="cash-tendered-row" style="display:flex;align-items:center;gap:8px;">
+            <span class="cart-disc-lbl">Cash given</span>
+            <input type="number" class="cart-disc-in" id="cash-tendered" placeholder="Amount received" min="0" step="0.01" oninput="updTot()">
+          </div>
+
+          <!-- Mobile Money: phone input + network badge -->
+          <div id="momo-row" style="display:none;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="cart-disc-lbl">Phone number</span>
+              <input type="tel" class="cart-disc-in" id="momo-phone" placeholder="e.g. 0244123456" oninput="detectMomoNetwork()">
+            </div>
+            <div id="momo-network-badge" style="display:none;padding:5px 10px;border-radius:var(--r-sm);font-size:12px;font-weight:600;align-items:center;gap:6px;"></div>
+            <div id="momo-status" style="display:none;"></div>
+          </div>
+
+          <button class="ckbtn" id="ckbtn" onclick="checkout()" disabled>Complete Sale →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="page" id="page-products">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left"><div class="ttl">Product Catalogue</div><div class="sub">All products registered in the system</div></div>
+        <button class="btn btn-a" onclick="openPM()">+ Add Product</button>
+      </div>
+      <div class="admin-body">
+        <div class="flt-bar">
+          <input class="fi2" id="pf-s" placeholder="Search products…" oninput="renderPT()">
+          <select class="fsel2" id="pf-c" onchange="renderPT()" style="width:auto;"><option value="">All Categories</option></select>
+        </div>
+        <div class="tw" style="overflow-y:auto;max-height:calc(100vh - 220px);">
+          <table class="dt" style="min-width:700px;">
+            <thead style="position:sticky;top:0;z-index:1;">
+              <tr><th>Product</th><th>Category</th><th>Selling Price</th><th>Cost Price</th><th>Stock</th><th>Barcode</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="pt-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVENTORY -->
+  <div class="page" id="page-inventory">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left"><div class="ttl">Inventory</div><div class="sub">Real-time stock levels and alerts</div></div>
+        <button class="btn btn-a" onclick="openRS()">+ RESTOCK</button>
+      </div>
+      <div class="admin-body">
+        <div class="sg">
+          <div class="sc b"><div class="sc-lbl">Total Products</div><div class="sc-val" id="iv-tot">0</div></div>
+          <div class="sc a"><div class="sc-lbl">Low Stock</div><div class="sc-val" id="iv-low">0</div></div>
+          <div class="sc r"><div class="sc-lbl">Out of Stock</div><div class="sc-val" id="iv-out">0</div></div>
+          <div class="sc g"><div class="sc-lbl">Stock Value</div><div class="sc-val" id="iv-val">—</div></div>
+        </div>
+        <div class="tw" style="overflow-y:auto;max-height:calc(100vh - 320px);">
+          <table class="dt" style="min-width:700px;">
+            <thead style="position:sticky;top:0;z-index:1;">
+              <tr><th>Product</th><th>Category</th><th>Qty</th><th>Level</th><th>Unit Price</th><th>Total Value</th><th>Status</th></tr>
+            </thead>
+            <tbody id="iv-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOMERS -->
+  <div class="page" id="page-customers">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left"><div class="ttl">Customers</div><div class="sub">Customer accounts and loyalty points</div></div>
+        <button class="btn btn-a" onclick="openCM()">+ ADD CUSTOMER</button>
+      </div>
+      <div class="admin-body">
+        <div class="tw">
+          <table class="dt"><thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Purchases</th><th>Total Spent</th><th>Points</th><th>Actions</th></tr></thead>
+          <tbody id="cu-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div class="page" id="page-reports">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left">
+          <div class="ttl">Reports & Analytics</div>
+          <div class="sub">Sales performance and revenue data</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select class="fsel2" id="rp-per" onchange="renderRep()" style="width:auto;">
+            <option value="today">Today</option>
+            <option value="week" selected>This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+          <button class="btn btn-a" onclick="exportCSV()">⬇ Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Report Sub-tabs -->
+      <div class="report-tabs">
+        <button class="rtab on" id="rt-sales"   onclick="showRTab('sales')">Sales</button>
+        <button class="rtab"    id="rt-profit"  onclick="showRTab('profit')">Profit</button>
+        <button class="rtab"    id="rt-cashier" onclick="showRTab('cashier')">Cashier Performance</button>
+        <button class="rtab"    id="rt-logs"    onclick="showRTab('logs')">Transaction Logs</button>
+      </div>
+
+      <div class="report-body">
+
+        <!-- SALES TAB -->
+        <div id="rtab-sales" class="report-tab-content">
+          <div class="sg">
+            <div class="sc g"><div class="sc-lbl">Revenue</div><div class="sc-val" id="rp-rev">GHS 0</div></div>
+            <div class="sc b"><div class="sc-lbl">Transactions</div><div class="sc-val" id="rp-txn">0</div></div>
+            <div class="sc r"><div class="sc-lbl">Items Sold</div><div class="sc-val" id="rp-itm">0</div></div>
+            <div class="sc a"><div class="sc-lbl">Avg. Sale</div><div class="sc-val" id="rp-avg">GHS 0</div></div>
+          </div>
+          <div class="charts-g">
+            <div class="cb">
+              <div class="cb-ttl">Payment Method Breakdown</div>
+              <canvas id="c-pay" height="200"></canvas>
+            </div>
+            <div class="cb">
+              <div class="cb-ttl">Top Products — Units Sold</div>
+              <canvas id="c-prd" height="200"></canvas>
+            </div>
+          </div>
+          <div>
+            <div class="section-label">Recent Transactions</div>
+            <div class="tw">
+              <table class="dt">
+                <thead><tr>
+                  <th>Date / Time</th>
+                  <th>Transaction ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Method</th>
+                  <th>Total</th>
+                  <th></th>
+                </tr></thead>
+                <tbody id="rp-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFIT TAB -->
+        <div id="rtab-profit" class="report-tab-content" style="display:none;">
+          <div class="sg">
+            <div class="sc g"><div class="sc-lbl">Total Revenue</div><div class="sc-val" id="pf-rev">GHS 0</div></div>
+            <div class="sc r"><div class="sc-lbl">Total Cost</div><div class="sc-val" id="pf-cost">GHS 0</div></div>
+            <div class="sc a"><div class="sc-lbl">Gross Profit</div><div class="sc-val" id="pf-profit">GHS 0</div></div>
+            <div class="sc b"><div class="sc-lbl">Profit Margin</div><div class="sc-val" id="pf-margin">0%</div></div>
+          </div>
+          <div>
+            <div class="section-label">Profit by Product</div>
+            <div class="tw">
+              <table class="dt">
+                <thead><tr>
+                  <th>Product</th>
+                  <th>Units Sold</th>
+                  <th>Revenue</th>
+                  <th>Cost</th>
+                  <th>Profit</th>
+                  <th>Margin</th>
+                </tr></thead>
+                <tbody id="pf-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CASHIER PERFORMANCE TAB -->
+        <div id="rtab-cashier" class="report-tab-content" style="display:none;">
+          <div class="section-label">Performance by Cashier</div>
+          <div class="tw">
+            <table class="dt">
+              <thead><tr>
+                <th>Cashier</th>
+                <th>Transactions</th>
+                <th>Items Sold</th>
+                <th>Revenue</th>
+                <th>Avg. Sale</th>
+                <th>Discounts Given</th>
+              </tr></thead>
+              <tbody id="cp-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TRANSACTION LOGS TAB -->
+        <div id="rtab-logs" class="report-tab-content" style="display:none;">
+          <div class="section-label">System Activity Log</div>
+          <div class="tw">
+            <table class="dt">
+              <thead><tr>
+                <th>Date / Time</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Detail</th>
+              </tr></thead>
+              <tbody id="lg-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <div class="page" id="page-users">
+    <div class="admin">
+      <div class="admin-hd">
+        <div class="admin-hd-left"><div class="ttl">Users</div><div class="sub">System access and role management</div></div>
+        <button class="btn btn-a" onclick="openUM()">+ ADD USER</button>
+      </div>
+      <div class="admin-body">
+        <div class="tw">
+          <table class="dt"><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="us-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODALS ════════════════════════════════ -->
+
+<!-- Product Modal -->
+<div class="ov" id="m-prod">
+  <div class="mb">
+    <div class="mb-hd"><h2 id="mp-title">Add Product</h2><button class="mb-x" onclick="cm('m-prod')">✕</button></div>
+    <div class="mb-body">
+      <input type="hidden" id="pe-id">
+      <div class="mg">
+        <div class="fg2" style="grid-column:1/-1;"><label class="fl2">Product Name *</label><input class="fi2" id="pe-nm" placeholder="e.g. Coca Cola 500ml"></div>
+        <div class="fg2"><label class="fl2">Category</label>
+          <input class="fi2" id="pe-cat" placeholder="e.g. Beverages" list="cat-list" autocomplete="off">
+          <datalist id="cat-list"></datalist>
+        </div>
+        <div class="fg2"><label class="fl2">Supplier</label><input class="fi2" id="pe-sup" placeholder="Supplier name"></div>
+        <div class="fg2"><label class="fl2">Selling Price (GHS) *</label><input type="number" class="fi2" id="pe-pr" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="fg2"><label class="fl2">Cost Price (GHS)</label><input type="number" class="fi2" id="pe-cost" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="fg2"><label class="fl2">Barcode</label><input class="fi2" id="pe-bc" placeholder="e.g. 1234567890"></div>
+        <div class="fg2"><label class="fl2">Low Stock Alert Qty</label><input type="number" class="fi2" id="pe-low" placeholder="5" min="0"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border);">
+        💡 Stock levels are managed from the <strong>Inventory</strong> page using the Restock button.
+      </div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-prod')">Cancel</button>
+      <button class="btn btn-a" onclick="saveProd()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Restock Modal -->
+<div class="ov" id="m-rs">
+  <div class="mb">
+    <div class="mb-hd"><h2>RESTOCK ITEM</h2><button class="mb-x" onclick="cm('m-rs')">✕</button></div>
+    <div class="mb-body">
+      <div class="fg2"><label class="fl2">Select Product</label><select class="fsel2" id="rs-prod"></select></div>
+      <div class="fg2"><label class="fl2">Add Quantity</label><input type="number" class="fi2" id="rs-qty" placeholder="Enter qty to add" min="1"></div>
+      <div class="fg2"><label class="fl2">Note (optional)</label><input class="fi2" id="rs-note" placeholder="Delivery note…"></div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-rs')">CANCEL</button>
+      <button class="btn btn-a" onclick="doRS()">RESTOCK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Modal -->
+<div class="ov" id="m-cust">
+  <div class="mb">
+    <div class="mb-hd"><h2 id="mc-title">ADD CUSTOMER</h2><button class="mb-x" onclick="cm('m-cust')">✕</button></div>
+    <div class="mb-body">
+      <input type="hidden" id="ce-id">
+      <div class="mg">
+        <div class="fg2"><label class="fl2">Full Name</label><input class="fi2" id="ce-nm" placeholder="Customer name"></div>
+        <div class="fg2"><label class="fl2">Phone</label><input class="fi2" id="ce-ph" placeholder="+233…"></div>
+        <div class="fg2"><label class="fl2">Email</label><input class="fi2" id="ce-em" placeholder="email@example.com"></div>
+        <div class="fg2"><label class="fl2">Address</label><input class="fi2" id="ce-ad" placeholder="Address"></div>
+      </div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-cust')">CANCEL</button>
+      <button class="btn btn-a" onclick="saveCust()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="ov" id="m-user">
+  <div class="mb">
+    <div class="mb-hd"><h2 id="mu-title">ADD USER</h2><button class="mb-x" onclick="cm('m-user')">✕</button></div>
+    <div class="mb-body">
+      <input type="hidden" id="ue-id">
+      <div class="mg">
+        <div class="fg2"><label class="fl2">Full Name</label><input class="fi2" id="ue-nm" placeholder="Full name"></div>
+        <div class="fg2"><label class="fl2">Username</label><input class="fi2" id="ue-un" placeholder="username"></div>
+        <div class="fg2"><label class="fl2">Password</label><input type="password" class="fi2" id="ue-pw" placeholder="Password"></div>
+        <div class="fg2"><label class="fl2">Role</label>
+          <select class="fsel2" id="ue-rl">
+            <option value="cashier">Cashier</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-user')">CANCEL</button>
+      <button class="btn btn-a" onclick="saveUser()">SAVE USER</button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal — thermal receipt style -->
+<div class="ov" id="m-rcpt">
+  <div class="mb" style="width:380px;">
+    <div class="mb-hd">
+      <h2>Receipt</h2>
+      <button class="mb-x" onclick="cm('m-rcpt')">✕</button>
+    </div>
+    <div style="padding:24px;background:#F9F9F7;" id="rcpt-body"></div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-rcpt')">Close</button>
+      <button class="btn btn-g" onclick="printReceipt()">🖨 Print Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- Shift Summary Modal -->
+<div class="ov" id="m-shift">
+  <div class="mb" style="width:500px;">
+    <div class="mb-hd">
+      <h2>Shift Summary</h2>
+      <button class="mb-x" onclick="cm('m-shift')">✕</button>
+    </div>
+    <div class="mb-body" id="shift-body"></div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-shift')">Close</button>
+      <button class="btn btn-g" onclick="printShift()">🖨 Print Summary</button>
+    </div>
+  </div>
+</div>
+
+<!-- Void Sale Modal -->
+<div class="ov" id="m-void">
+  <div class="mb" style="width:480px;">
+    <div class="mb-hd">
+      <h2>Void / Refund Sale</h2>
+      <button class="mb-x" onclick="cm('m-void')">✕</button>
+    </div>
+    <div class="mb-body">
+      <div style="padding:12px 14px;background:var(--red-lt);border:1px solid var(--red-bd);border-radius:var(--r-sm);font-size:13px;color:var(--red);font-weight:500;">
+        ⚠ This will void the sale and restore all stock quantities.
+      </div>
+      <div id="void-sale-info" style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:14px;font-size:13px;"></div>
+      <div class="fg2">
+        <label class="fl2">Reason for void</label>
+        <select class="fsel2" id="void-reason">
+          <option value="Customer request">Customer request</option>
+          <option value="Wrong items scanned">Wrong items scanned</option>
+          <option value="Payment issue">Payment issue</option>
+          <option value="Manager override">Manager override</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="cm('m-void')">Cancel</button>
+      <button class="btn btn-r" onclick="confirmVoid()" style="font-weight:700;">Confirm Void</button>
+    </div>
+  </div>
+</div>
+
+<!-- Print-only receipt area (hidden on screen) -->
+<div id="print-area" style="display:none;"></div>
+
+<!-- Camera Barcode Scanner Modal -->
+<div class="ov" id="m-cam">
+  <div class="mb" style="width:480px;">
+    <div class="mb-hd">
+      <h2>📷 CAMERA BARCODE SCANNER</h2>
+      <button class="mb-x" onclick="closeCamScanner()">✕</button>
+    </div>
+    <div class="mb-body" style="gap:14px;">
+      <!-- Camera viewfinder -->
+      <div style="position:relative;background:var(--navy);overflow:hidden;aspect-ratio:4/3;">
+        <video id="cam-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;"></video>
+        <canvas id="cam-canvas" style="display:none;"></canvas>
+        <!-- Scan overlay -->
+        <div style="position:absolute;inset:0;pointer-events:none;">
+          <!-- Corner brackets -->
+          <div style="position:absolute;top:20%;left:15%;width:60px;height:60px;border-top:3px solid var(--accent);border-left:3px solid var(--accent);"></div>
+          <div style="position:absolute;top:20%;right:15%;width:60px;height:60px;border-top:3px solid var(--accent);border-right:3px solid var(--accent);"></div>
+          <div style="position:absolute;bottom:20%;left:15%;width:60px;height:60px;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);"></div>
+          <div style="position:absolute;bottom:20%;right:15%;width:60px;height:60px;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);"></div>
+          <!-- Scan line -->
+          <div id="cam-scanline" style="position:absolute;left:15%;right:15%;top:50%;height:2px;background:var(--accent);opacity:0.8;animation:scanline 2s ease-in-out infinite;"></div>
+          <!-- Guide text -->
+          <div style="position:absolute;bottom:8%;left:0;right:0;text-align:center;font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.6);">AIM BARCODE AT SCANNER</div>
+        </div>
+        <!-- No camera message -->
+        <div id="cam-nocam" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text3);font-size:12px;letter-spacing:1px;">
+          <div style="font-size:32px;">📷</div>
+          <div>NO CAMERA DETECTED</div>
+        </div>
+        <!-- Result flash -->
+        <div id="cam-flash" style="position:absolute;inset:0;background:var(--amber);opacity:0;pointer-events:none;transition:opacity 0.1s;"></div>
+      </div>
+
+      <!-- Status bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;">
+          <span style="font-size:9px;letter-spacing:1.5px;color:var(--text3);">STATUS</span>
+          <span id="cam-status" style="font-size:11px;color:var(--amber);letter-spacing:1px;">INITIALISING…</span>
+        </div>
+        <select id="cam-device-sel" class="fsel2" style="width:auto;font-size:11px;padding:5px 8px;" onchange="switchCamera()">
+          <option value="">Default Camera</option>
+        </select>
+      </div>
+
+      <!-- Manual barcode entry fallback -->
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="cam-manual" class="fi2" placeholder="Or type / paste barcode manually…" style="flex:1;"
+          onkeydown="if(event.key==='Enter') camManualLookup()">
+        <button class="btn btn-a" onclick="camManualLookup()" style="white-space:nowrap;">LOOK UP</button>
+      </div>
+
+      <!-- Last scanned result -->
+      <div id="cam-result" style="display:none;background:var(--navy);border:1px solid var(--amber-bd);padding:12px 14px;">
+        <div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;margin-bottom:6px;">LAST SCAN</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div>
+            <div id="cam-result-name" style="font-size:13px;font-weight:900;color:var(--white);"></div>
+            <div id="cam-result-bc" style="font-size:10px;color:var(--text3);margin-top:2px;"></div>
+          </div>
+          <div id="cam-result-price" style="font-size:14px;font-weight:900;color:var(--amber);white-space:nowrap;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="mb-ft">
+      <button class="btn btn-o" onclick="closeCamScanner()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Money Payment Modal -->
+<div class="ov" id="m-momo">
+  <div class="mb" style="width:420px;">
+    <div class="mb-hd">
+      <h2>📱 Mobile Money Payment</h2>
+      <button class="mb-x" onclick="cancelMoMo()">✕</button>
+    </div>
+    <div class="mb-body" style="gap:16px;">
+
+      <!-- Network + amount header -->
+      <div style="background:var(--bg);border-radius:var(--r);padding:16px;text-align:center;">
+        <div id="momo-modal-network" style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:4px;"></div>
+        <div id="momo-modal-amount" style="font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.5px;"></div>
+        <div id="momo-modal-phone" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
+      </div>
+
+      <!-- Status steps -->
+      <div style="display:flex;flex-direction:column;gap:10px;" id="momo-steps">
+        <div class="momo-step" id="step-send">
+          <div class="momo-step-icon pending" id="step-send-icon">1</div>
+          <div>
+            <div class="momo-step-title">Payment request sent</div>
+            <div class="momo-step-sub">Prompt delivered to customer's phone</div>
+          </div>
+        </div>
+        <div class="momo-step" id="step-wait">
+          <div class="momo-step-icon waiting" id="step-wait-icon">2</div>
+          <div>
+            <div class="momo-step-title">Waiting for customer approval</div>
+            <div class="momo-step-sub" id="step-wait-sub">Customer should enter their PIN on their phone</div>
+          </div>
+        </div>
+        <div class="momo-step" id="step-done">
+          <div class="momo-step-icon" id="step-done-icon">3</div>
+          <div>
+            <div class="momo-step-title" id="step-done-title">Payment confirmation</div>
+            <div class="momo-step-sub" id="step-done-sub">Waiting...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live status message -->
+      <div id="momo-live-status" style="text-align:center;font-size:13px;color:var(--text3);padding:8px;"></div>
+
+      <!-- Timeout note -->
+      <div style="font-size:11px;color:var(--text4);text-align:center;line-height:1.6;" id="momo-timeout-note">
+        Payment expires in <span id="momo-countdown" style="font-weight:700;color:var(--amber);">5:00</span>
+      </div>
+    </div>
+    <div class="mb-ft" id="momo-footer">
+      <button class="btn btn-o" onclick="cancelMoMo()">Cancel Payment</button>
+      <button class="btn btn-a" id="momo-manual-confirm" onclick="momoManualConfirm()" style="display:none;">Mark as Paid</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// API CLIENT — connects to Node.js/Express backend
+// ═══════════════════════════════════════════════════════════════
+const API = {
+  base: '/api',
+  token: null,
+
+  headers() {
+    const h = { 'Content-Type': 'application/json' };
+    if (this.token) h['Authorization'] = 'Bearer ' + this.token;
+    return h;
+  },
+
+  async get(path) {
+    const r = await fetch(this.base + path, { headers: this.headers() });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+    return r.json();
+  },
+
+  async post(path, body) {
+    const r = await fetch(this.base + path, {
+      method: 'POST', headers: this.headers(), body: JSON.stringify(body)
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+    return r.json();
+  },
+
+  async put(path, body) {
+    const r = await fetch(this.base + path, {
+      method: 'PUT', headers: this.headers(), body: JSON.stringify(body)
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+    return r.json();
+  },
+
+  async patch(path, body) {
+    const r = await fetch(this.base + path, {
+      method: 'PATCH', headers: this.headers(), body: JSON.stringify(body||{})
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+    return r.json();
+  },
+
+  async del(path) {
+    const r = await fetch(this.base + path, {
+      method: 'DELETE', headers: this.headers()
+    });
+    if (!r.ok) { const e = await r.json(); throw new Error(e.error || r.statusText); }
+    return r.json();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let CU    = null;   // current user
+let CART  = [];
+let PAY   = 'cash';
+let ACAT  = 'ALL';
+let CHARTS = {};
+let ALL_PRODUCTS  = [];
+let ALL_CUSTOMERS = [];
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+async function login() {
+  const username = document.getElementById('lu').value.trim();
+  const password = document.getElementById('lp').value;
+  if (!username || !password) { toast('Enter username and password','er'); return; }
+  try {
+    const data = await API.post('/auth/login', { username, password });
+    API.token = data.token;
+    CU = data.user;
+    document.getElementById('auth').style.display = 'none';
+    const app = document.getElementById('app');
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
+    document.getElementById('b-av').textContent = CU.name[0].toUpperCase();
+    document.getElementById('b-nm').textContent = CU.name;
+    document.getElementById('b-rl').textContent = CU.role.toUpperCase();
+    applyRoles();
+    await initPOS();
+    startClock();
+    // Admin and manager see dashboard first; cashier goes straight to sales
+    if (CU.role === 'cashier') {
+      go('pos');
+    } else {
+      go('dashboard');
+    }
+    toast('Welcome back, ' + CU.name.split(' ')[0], 'ok');
+  } catch (err) {
+    toast(err.message || 'Login failed', 'er');
+  }
+}
+
+async function logout() {
+  try { await API.post('/auth/logout', {}); } catch(_) {}
+  API.token = null; CU = null; CART = [];
+  document.getElementById('auth').style.display = 'flex';
+  document.getElementById('app').style.display  = 'none';
+}
+
+function applyRoles() {
+  document.querySelectorAll('[data-role]').forEach(el => {
+    const roles = el.getAttribute('data-role').split(',');
+    el.style.display = roles.includes(CU.role) ? '' : 'none';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════════════
+function go(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('on'));
+  document.querySelectorAll('.bn').forEach(x => x.classList.remove('on'));
+  document.getElementById('page-'+p).classList.add('on');
+  const navBtn = document.getElementById('nav-'+p);
+  if (navBtn) navBtn.classList.add('on');
+  if (p==='dashboard') renderDashboard();
+  if (p==='products')  renderPT();
+  if (p==='inventory') renderIV();
+  if (p==='customers') renderCU();
+  if (p==='reports')   showRTab('sales');
+  if (p==='users')     renderUS();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════════════════════
+function startClock() {
+  const el = document.getElementById('clk');
+  const tick = () => {
+    const n = new Date();
+    el.textContent = [n.getHours(),n.getMinutes(),n.getSeconds()]
+      .map(x=>String(x).padStart(2,'0')).join(':');
+  };
+  tick(); setInterval(tick, 1000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POS
+// ═══════════════════════════════════════════════════════════════
+async function initPOS() {
+  try {
+    ALL_PRODUCTS  = await API.get('/products');
+    ALL_CUSTOMERS = await API.get('/customers');
+    buildCats();
+    renderGrid();
+    updCustDD();
+  } catch(err) {
+    toast('Failed to load products: '+err.message,'er');
+  }
+}
+
+// Category colour map — consistent colours per category name
+// ─── CATEGORY COLOUR SYSTEM ──────────────────────────────────
+// Colours are assigned DETERMINISTICALLY by hashing the category name.
+// Same name → always same colour, regardless of load order.
+// Null/empty/uncategorised → always neutral grey (never a category colour).
+
+const CAT_PALETTE = [
+  {c:'#1D4ED8', lt:'#DBEAFE'}, // blue
+  {c:'#15803D', lt:'#DCFCE7'}, // green
+  {c:'#B45309', lt:'#FEF3C7'}, // amber
+  {c:'#7C3AED', lt:'#EDE9FE'}, // violet
+  {c:'#BE185D', lt:'#FCE7F3'}, // pink
+  {c:'#0369A1', lt:'#E0F2FE'}, // cyan
+  {c:'#065F46', lt:'#D1FAE5'}, // teal
+  {c:'#92400E', lt:'#FEF0E0'}, // brown
+  {c:'#6B21A8', lt:'#F3E8FF'}, // purple
+  {c:'#0F766E', lt:'#CCFBF1'}, // emerald
+  {c:'#C2410C', lt:'#FFF1EE'}, // orange
+  {c:'#0E7490', lt:'#ECFEFF'}, // sky
+];
+
+// Neutral grey — used for uncategorised products only
+const CAT_GREY = {c:'#64748B', lt:'#F1F5F9'};
+
+function hashCatName(str) {
+  // Simple but stable djb2-style hash → always same number for same string
+  let h = 5381;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) + h) ^ str.charCodeAt(i);
+    h = h >>> 0; // keep unsigned 32-bit
+  }
+  return h;
+}
+
+function getCatColour(catName) {
+  // No category → always neutral grey, never a real category colour
+  if (!catName || !catName.trim()) return CAT_GREY;
+  // Deterministic: hash the lowercase name → index into palette
+  const idx = hashCatName(catName.trim().toLowerCase()) % CAT_PALETTE.length;
+  return CAT_PALETTE[idx];
+}
+
+function buildCats() {
+  const cats = ['ALL', ...new Set(ALL_PRODUCTS.map(p=>p.category_name).filter(Boolean))];
+  document.getElementById('cats').innerHTML = cats.map(c => {
+    const col = c === 'ALL' ? null : getCatColour(c);
+    const dot = col ? `<span class="cat-dot" style="background:${col.c};"></span>` : '';
+    return `<button class="cat ${c===ACAT?'on':''}" onclick="setAcat('${c}')">${dot}${c}</button>`;
+  }).join('');
+}
+
+function setAcat(c) {
+  ACAT = c;
+  document.querySelectorAll('.cat').forEach(b => {
+    // match by text content stripped of dot
+    b.classList.toggle('on', b.textContent.trim()===c);
+  });
+  renderGrid();
+}
+
+function renderGrid() {
+  const q = (document.getElementById('ps').value||'').toLowerCase();
+  const f = ALL_PRODUCTS.filter(p => {
+    const catOk  = ACAT==='ALL' || p.category_name===ACAT;
+    const srchOk = !q || p.product_name.toLowerCase().includes(q) || (p.barcode||'').includes(q);
+    return catOk && srchOk;
+  });
+  const g = document.getElementById('pgrid');
+  if (!f.length) {
+    g.innerHTML = `<div style="padding:32px;color:var(--text4);font-size:14px;text-align:center;">No products found</div>`;
+    return;
+  }
+  g.innerHTML = f.map(p => {
+    const oos = p.stock <= 0;
+    const low = !oos && p.stock <= (p.low_stock_alert||5);
+    const col = getCatColour(p.category_name);
+    // Stock badge
+    let stockBadge = '';
+    if (oos) {
+      stockBadge = `<span class="pc-stock-badge" style="background:var(--danger-lt);color:var(--danger);">Out of stock</span>`;
+    } else if (low) {
+      stockBadge = `<span class="pc-stock-badge" style="background:var(--warning-lt);color:var(--warning);">Low: ${p.stock}</span>`;
+    } else {
+      stockBadge = `<span style="color:var(--text4);font-size:10px;">${p.stock} left</span>`;
+    }
+    return `<div class="pc${oos?' oos':''}" onclick="${oos?'void(0)':` addItem(${p.product_id})`}">
+      <div class="pc-band" style="background:${col.c};"></div>
+      <div class="pc-body">
+        <span class="pc-cat" style="background:${col.lt};color:${col.c};">${p.category_name||'General'}</span>
+        <div class="pc-nm">${p.product_name}</div>
+        <div class="pc-pr">GHS ${parseFloat(p.selling_price).toFixed(2)}</div>
+        <div class="pc-stock">${stockBadge}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updCustDD() {
+  const dd = document.getElementById('cust-dd');
+  const v  = dd.value;
+  dd.innerHTML = '<option value="">Walk-in</option>' +
+    ALL_CUSTOMERS.map(c=>`<option value="${c.customer_id}">${c.full_name}</option>`).join('');
+  dd.value = v;
+  onCustChange();
+}
+
+// ─── CART ────────────────────────────────────────────────────
+function addItem(pid) {
+  const p = ALL_PRODUCTS.find(x=>x.product_id===pid);
+  if (!p || p.stock<=0) return;
+  const ex = CART.find(i=>i.product_id===pid);
+  if (ex) {
+    if (ex.quantity >= p.stock) { toast('Max stock reached','er'); return; }
+    ex.quantity++;
+  } else {
+    CART.push({ product_id: p.product_id, name: p.product_name,
+                price: parseFloat(p.selling_price), quantity: 1 });
+  }
+  renderCart(); updTot();
+  animateCartCount();
+}
+
+function rmItem(pid) {
+  CART = CART.filter(i=>i.product_id!==pid);
+  renderCart(); updTot();
+}
+
+function clrCart() {
+  CART = [];
+  document.getElementById('disc').value = '';
+  document.getElementById('cash-tendered').value = '';
+  renderCart(); updTot();
+}
+
+function chgQty(pid, d) {
+  const item = CART.find(i=>i.product_id===pid);
+  if (!item) return;
+  const p = ALL_PRODUCTS.find(x=>x.product_id===pid);
+  item.quantity = Math.max(1, Math.min(item.quantity+d, p?p.stock:999));
+  renderCart(); updTot();
+}
+
+function renderCart() {
+  const box   = document.getElementById('citems');
+  const total = CART.reduce((s,i)=>s+i.quantity,0);
+  document.getElementById('cc').textContent = total;
+  if (!CART.length) {
+    box.innerHTML = `<div class="cart-empty">
+      <div class="cart-empty-ico">🛒</div>
+      <div class="cart-empty-txt">Cart is empty</div>
+      <div class="cart-empty-sub">Click a product to add it</div>
+    </div>`;
+    document.getElementById('ckbtn').disabled = true;
+    return;
+  }
+  box.innerHTML = CART.map(i => {
+    const prod = ALL_PRODUCTS.find(x=>x.product_id===i.product_id);
+    const col  = getCatColour(prod ? prod.category_name : '');
+    return `<div class="ci" style="border-left:3px solid ${col.c};">
+      <div class="ci-name">${i.name}</div>
+      <button class="ci-rm" onclick="rmItem(${i.product_id})">✕</button>
+      <div class="ci-cat">${prod ? prod.category_name : ''}</div>
+      <div class="ci-ctrl">
+        <button class="qb" onclick="chgQty(${i.product_id},-1)">−</button>
+        <span class="qn">${i.quantity}</span>
+        <button class="qb" onclick="chgQty(${i.product_id},1)">+</button>
+      </div>
+      <div class="ci-price">GHS ${(i.price*i.quantity).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('ckbtn').disabled = false;
+}
+
+function updTot() {
+  const sub  = CART.reduce((s,i)=>s+i.price*i.quantity,0);
+  const dpct = parseFloat(document.getElementById('disc').value)||0;
+  const damt = sub*(dpct/100);
+  const after= sub-damt;
+  const tax  = after*0.15;
+  const tot  = after+tax;
+  document.getElementById('t-sub').textContent = 'GHS '+sub.toFixed(2);
+  document.getElementById('t-dis').textContent = '-GHS '+damt.toFixed(2);
+  document.getElementById('t-tax').textContent = 'GHS '+tax.toFixed(2);
+  document.getElementById('t-tot').textContent = 'GHS '+tot.toFixed(2);
+  const chgRow = document.getElementById('t-chg-row');
+  if (chgRow) {
+    if (PAY==='cash') {
+      const tendered = parseFloat(document.getElementById('cash-tendered').value)||0;
+      const change   = Math.max(0, tendered-tot);
+      chgRow.style.display = tendered>0 ? 'flex' : 'none';
+      document.getElementById('t-chg').textContent = 'GHS '+change.toFixed(2);
+    } else { chgRow.style.display='none'; }
+  }
+}
+
+function selPm(m) {
+  PAY = m;
+  document.querySelectorAll('.pm').forEach(b => b.classList.remove('sel'));
+  document.getElementById('pm-'+m).classList.add('sel');
+  // Show/hide contextual rows
+  document.getElementById('cash-tendered-row').style.display = m==='cash'   ? 'flex'   : 'none';
+  document.getElementById('momo-row').style.display           = m==='mobile' ? 'flex'   : 'none';
+  // Reset MoMo state when switching away
+  if (m !== 'mobile') resetMomoUI();
+  updTot();
+}
+
+async function checkout() {
+  if (!CART.length) return;
+
+  // For mobile money, validate phone first then initiate Paystack
+  if (PAY === 'mobile') {
+    const phone = (document.getElementById('momo-phone').value || '').trim();
+    if (!phone) { toast('Enter customer phone number for Mobile Money', 'er'); return; }
+    await checkoutMoMo(phone);
+    return;
+  }
+
+  await completeSale();
+}
+
+async function completeSale(paystackRef) {
+  const sub     = CART.reduce((s,i) => s+i.price*i.quantity, 0);
+  const dpct    = parseFloat(document.getElementById('disc').value) || 0;
+  const damt    = sub * (dpct/100);
+  const tot     = (sub - damt) * 1.15;
+  const tendered = parseFloat(document.getElementById('cash-tendered').value) || null;
+  const custId  = document.getElementById('cust-dd').value || null;
+
+  const payload = {
+    customer_id:     custId ? parseInt(custId) : null,
+    items:           CART.map(i => ({ product_id: i.product_id, quantity: i.quantity })),
+    discount_pct:    dpct,
+    payment_method:  PAY,
+    cash_tendered:   tendered,
+    reference_no:    paystackRef || null
+  };
+
+  try {
+    document.getElementById('ckbtn').disabled = true;
+    const result   = await API.post('/sales', payload);
+    const saleData = await API.get('/sales/' + result.sale.saleId);
+    showReceipt(saleData);
+    clrCart();
+    resetMomoUI();
+    ALL_PRODUCTS = await API.get('/products');
+    renderGrid();
+    toast('Sale complete — GHS ' + result.sale.total_amount, 'ok');
+  } catch (err) {
+    toast(err.message, 'er');
+    document.getElementById('ckbtn').disabled = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PAYSTACK MOBILE MONEY INTEGRATION
+// Supports: MTN MoMo, Vodafone Cash, AirtelTigo Money
+// ═══════════════════════════════════════════════════════════════
+let MOMO_REF       = null;
+let MOMO_POLL_TIMER = null;
+let MOMO_COUNTDOWN = null;
+let MOMO_CANCELLED = false;
+
+const NETWORK_INFO = {
+  mtn:  { name: 'MTN Mobile Money',    colour: '#FFC107', prefixes: ['024','054','055','059','025'] },
+  vod:  { name: 'Vodafone Cash',       colour: '#E30614', prefixes: ['020','050'] },
+  atl:  { name: 'AirtelTigo Money',    colour: '#E2001A', prefixes: ['027','057','026','056'] },
+};
+
+function detectMomoNetwork() {
+  const raw    = document.getElementById('momo-phone').value.trim();
+  const badge  = document.getElementById('momo-network-badge');
+  const local  = raw.replace(/^\+233/, '0').replace(/^233/, '0').replace(/\s+/g,'');
+  const prefix = local.substring(0, 3);
+
+  let found = null;
+  for (const [key, info] of Object.entries(NETWORK_INFO)) {
+    if (info.prefixes.includes(prefix)) { found = { key, ...info }; break; }
+  }
+
+  if (found && local.length >= 3) {
+    badge.style.display     = 'flex';
+    badge.style.background  = found.colour + '18';
+    badge.style.border      = '1px solid ' + found.colour + '55';
+    badge.style.color       = found.colour;
+    badge.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${found.colour};flex-shrink:0;"></span> ${found.name} detected`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function resetMomoUI() {
+  document.getElementById('momo-phone').value = '';
+  document.getElementById('momo-network-badge').style.display = 'none';
+  document.getElementById('momo-row').style.display = 'none';
+  MOMO_REF = null;
+  MOMO_CANCELLED = false;
+  if (MOMO_POLL_TIMER) { clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null; }
+  if (MOMO_COUNTDOWN)  { clearInterval(MOMO_COUNTDOWN);  MOMO_COUNTDOWN  = null; }
+}
+
+async function checkoutMoMo(phone) {
+  // Calculate total
+  const sub  = CART.reduce((s,i) => s+i.price*i.quantity, 0);
+  const dpct = parseFloat(document.getElementById('disc').value) || 0;
+  const tot  = parseFloat(((sub - sub*(dpct/100)) * 1.15).toFixed(2));
+
+  // Detect network for display
+  const local  = phone.replace(/^\+233/, '0').replace(/^233/, '0').replace(/\s+/g,'');
+  const prefix = local.substring(0, 3);
+  let networkName = 'Mobile Money';
+  for (const info of Object.values(NETWORK_INFO)) {
+    if (info.prefixes.includes(prefix)) { networkName = info.name; break; }
+  }
+
+  // Show modal
+  document.getElementById('momo-modal-network').textContent = networkName;
+  document.getElementById('momo-modal-amount').textContent  = 'GHS ' + tot.toFixed(2);
+  document.getElementById('momo-modal-phone').textContent   = phone;
+  document.getElementById('momo-live-status').textContent   = 'Sending payment request…';
+  document.getElementById('momo-manual-confirm').style.display = 'none';
+  setMomoStep('send', 'active');
+  setMomoStep('wait', 'waiting');
+  setMomoStep('done', 'waiting');
+  MOMO_CANCELLED = false;
+  om('m-momo');
+
+  // Get customer email if any
+  const custId = document.getElementById('cust-dd').value || null;
+  const cust   = custId ? ALL_CUSTOMERS.find(c => String(c.customer_id) === String(custId)) : null;
+  const email  = cust?.email || null;
+
+  try {
+    document.getElementById('ckbtn').disabled = true;
+
+    const result = await API.post('/payments/mobile/initiate', {
+      amount:   tot,
+      phone:    phone,
+      email:    email,
+      sale_ref: 'PENDING'
+    });
+
+    MOMO_REF = result.reference;
+
+    setMomoStep('send', 'done');
+    setMomoStep('wait', 'active');
+    document.getElementById('momo-live-status').textContent = result.message || 'Waiting for customer to approve…';
+
+    // Start countdown (5 minutes)
+    startMomoCountdown(300);
+
+    // Start polling every 5 seconds
+    MOMO_POLL_TIMER = setInterval(() => pollMomoStatus(tot), 5000);
+
+  } catch(err) {
+    cm('m-momo');
+    document.getElementById('ckbtn').disabled = false;
+
+    // If Paystack not configured, offer manual confirmation fallback
+    if (err.message.includes('PAYSTACK_SECRET_KEY') || err.message.includes('not set')) {
+      toast('Paystack not configured — using manual confirmation', 'nf');
+      showManualMomoFallback(tot);
+    } else {
+      toast('MoMo initiation failed: ' + err.message, 'er');
+    }
+  }
+}
+
+async function pollMomoStatus(expectedAmount) {
+  if (!MOMO_REF || MOMO_CANCELLED) return;
+  try {
+    const result = await API.get('/payments/mobile/verify/' + MOMO_REF);
+
+    if (result.status === 'success') {
+      clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null;
+      clearInterval(MOMO_COUNTDOWN);  MOMO_COUNTDOWN  = null;
+      setMomoStep('wait', 'done');
+      setMomoStep('done', 'done');
+      document.getElementById('step-done-title').textContent = '✓ Payment confirmed!';
+      document.getElementById('step-done-sub').textContent   = 'GHS ' + result.amount.toFixed(2) + ' received';
+      document.getElementById('momo-live-status').textContent = '';
+      document.getElementById('momo-timeout-note').style.display = 'none';
+      document.getElementById('momo-footer').innerHTML = `<button class="btn btn-a" onclick="momoComplete()">Complete Sale →</button>`;
+      toast('Mobile Money payment confirmed!', 'ok');
+
+    } else if (result.status === 'failed' || result.status === 'abandoned') {
+      clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null;
+      clearInterval(MOMO_COUNTDOWN);  MOMO_COUNTDOWN  = null;
+      setMomoStep('done', 'failed');
+      document.getElementById('step-done-title').textContent = 'Payment failed';
+      document.getElementById('step-done-sub').textContent   = result.message || 'Customer declined or timed out';
+      document.getElementById('momo-live-status').textContent = '';
+      document.getElementById('momo-footer').innerHTML = `
+        <button class="btn btn-o" onclick="cancelMoMo()">Cancel</button>
+        <button class="btn btn-a" onclick="retryMoMo()">Retry Payment</button>`;
+
+    } else {
+      // Still pending — update countdown sub text
+      document.getElementById('step-wait-sub').textContent = 'Still waiting… ' + (result.message || '');
+    }
+  } catch(_) { /* silent — keep polling */ }
+}
+
+function momoComplete() {
+  cm('m-momo');
+  completeSale(MOMO_REF);
+  MOMO_REF = null;
+}
+
+function momoManualConfirm() {
+  // Fallback: cashier confirms they received payment manually
+  cm('m-momo');
+  completeSale(null);
+}
+
+function cancelMoMo() {
+  MOMO_CANCELLED = true;
+  if (MOMO_POLL_TIMER) { clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null; }
+  if (MOMO_COUNTDOWN)  { clearInterval(MOMO_COUNTDOWN);  MOMO_COUNTDOWN  = null; }
+  cm('m-momo');
+  document.getElementById('ckbtn').disabled = false;
+  MOMO_REF = null;
+  toast('Mobile Money payment cancelled', 'nf');
+}
+
+function retryMoMo() {
+  cm('m-momo');
+  MOMO_REF = null;
+  const phone = document.getElementById('momo-phone').value.trim();
+  if (phone) checkoutMoMo(phone);
+}
+
+function showManualMomoFallback(tot) {
+  // When Paystack isn't configured — show a simple manual confirmation
+  document.getElementById('momo-modal-network').textContent = 'Mobile Money (Manual)';
+  document.getElementById('momo-modal-amount').textContent  = 'GHS ' + tot.toFixed(2);
+  document.getElementById('momo-live-status').textContent   = 'Ask customer to send payment, then confirm below';
+  document.getElementById('momo-timeout-note').style.display = 'none';
+  setMomoStep('send', 'done');
+  setMomoStep('wait', 'active');
+  setMomoStep('done', 'waiting');
+  document.getElementById('momo-manual-confirm').style.display = 'inline-flex';
+  document.getElementById('momo-footer').innerHTML = `
+    <button class="btn btn-o" onclick="cancelMoMo()">Cancel</button>
+    <button class="btn btn-a" onclick="momoManualConfirm()">✓ Confirm Payment Received</button>`;
+  om('m-momo');
+}
+
+function startMomoCountdown(seconds) {
+  let remaining = seconds;
+  const el = document.getElementById('momo-countdown');
+  MOMO_COUNTDOWN = setInterval(() => {
+    remaining--;
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    if (el) el.textContent = m + ':' + String(s).padStart(2,'0');
+    if (remaining <= 60 && el) el.style.color = 'var(--red)';
+    if (remaining <= 0) {
+      clearInterval(MOMO_COUNTDOWN); MOMO_COUNTDOWN = null;
+      clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null;
+      setMomoStep('done', 'failed');
+      document.getElementById('step-done-title').textContent = 'Payment timed out';
+      document.getElementById('step-done-sub').textContent   = 'Customer did not respond in time';
+      document.getElementById('momo-footer').innerHTML = `
+        <button class="btn btn-o" onclick="cancelMoMo()">Cancel</button>
+        <button class="btn btn-a" onclick="retryMoMo()">Retry</button>`;
+    }
+  }, 1000);
+}
+
+function setMomoStep(step, state) {
+  const icon = document.getElementById('step-'+step+'-icon');
+  if (!icon) return;
+  icon.className = 'momo-step-icon ' + state;
+  if (state === 'done')   icon.textContent = '✓';
+  if (state === 'failed') icon.textContent = '✕';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RECEIPT
+// ═══════════════════════════════════════════════════════════════
+function showReceipt(sale) {
+  const d = new Date(sale.created_at).toLocaleString('en-GH');
+  document.getElementById('rcpt-body').innerHTML = `
+    <div class="rcpt">
+      <div class="rcpt-top">
+        <div class="rcpt-brand">APEX POS</div>
+        <div class="rcpt-addr">Kumasi, Ashanti Region, Ghana</div>
+        <div class="rcpt-addr">Tel: +233 (0) 200 000 000</div>
+      </div>
+      <hr class="rdiv">
+      <div class="rr"><span>Date:</span><span>${d}</span></div>
+      <div class="rr"><span>TXN:</span><span>${sale.transaction_ref}</span></div>
+      <div class="rr"><span>Cashier:</span><span>${sale.cashier_name}</span></div>
+      <div class="rr"><span>Customer:</span><span>${sale.customer_name||'Walk-in'}</span></div>
+      <hr class="rdiv">
+      ${(sale.items||[]).map(i=>`<div class="rr"><span>${i.product_name} ×${i.quantity}</span><span>GHS ${parseFloat(i.line_total).toFixed(2)}</span></div>`).join('')}
+      <hr class="rdiv">
+      <div class="rr"><span>Subtotal</span><span>GHS ${parseFloat(sale.subtotal).toFixed(2)}</span></div>
+      <div class="rr"><span>Discount</span><span>-GHS ${parseFloat(sale.discount_amount).toFixed(2)}</span></div>
+      <div class="rr"><span>Tax (15%)</span><span>GHS ${parseFloat(sale.tax_amount).toFixed(2)}</span></div>
+      <hr class="rdiv">
+      <div class="rr big"><span>TOTAL</span><span>GHS ${parseFloat(sale.total_amount).toFixed(2)}</span></div>
+      <div class="rr"><span>Payment</span><span style="text-transform:uppercase;">${sale.payment_method}</span></div>
+      ${sale.payment_method==='cash' && sale.cash_tendered ? `
+        <div class="rr"><span>Cash Given</span><span>GHS ${parseFloat(sale.cash_tendered).toFixed(2)}</span></div>
+        <div class="rr" style="color:var(--green);font-weight:900;"><span>Change</span><span>GHS ${parseFloat(sale.change_given||0).toFixed(2)}</span></div>` : ''}
+      <hr class="rdiv">
+      <div class="rfooter">THANK YOU FOR YOUR PURCHASE<br>★ PLEASE COME AGAIN ★</div>
+    </div>`;
+  om('m-rcpt');
+}
+
+async function viewSaleRcpt(id) {
+  try {
+    const sale = await API.get('/sales/'+id);
+    showReceipt(sale);
+  } catch(err) { toast(err.message,'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRODUCTS
+// ═══════════════════════════════════════════════════════════════
+async function renderPT() {
+  try {
+    const q   = (document.getElementById('pf-s').value||'').toLowerCase();
+    const cat = document.getElementById('pf-c').value;
+    const prods = await API.get('/products');
+
+    // Rebuild category filter dropdown
+    const cats = [...new Set(prods.map(p=>p.category_name).filter(Boolean))].sort();
+    const sel  = document.getElementById('pf-c');
+    const sv   = sel.value;
+    sel.innerHTML = '<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+    sel.value = sv;
+
+    const f = prods.filter(p =>
+      (!q || p.product_name.toLowerCase().includes(q) || (p.barcode||'').includes(q)) &&
+      (!cat || p.category_name===cat)
+    );
+
+    document.getElementById('pt-body').innerHTML = f.length ? f.map(p=>{
+      const oos = p.stock<=0;
+      const low = !oos && p.stock<=(p.low_stock_alert||5);
+      const col = getCatColour(p.category_name);
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:4px;height:36px;border-radius:2px;background:${col.c};flex-shrink:0;"></div>
+            <div>
+              <div style="font-weight:700;">${p.product_name}</div>
+              <div style="font-size:11px;color:var(--text3);">${p.supplier_name||'No supplier'}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="tag tag-b" style="background:${col.lt};color:${col.c};border-color:${col.c}20;">${p.category_name||'Uncategorised'}</span></td>
+        <td style="font-weight:700;color:var(--accent);">GHS ${parseFloat(p.selling_price).toFixed(2)}</td>
+        <td style="color:var(--text3);">GHS ${parseFloat(p.cost_price||0).toFixed(2)}</td>
+        <td style="font-weight:700;">${p.stock}</td>
+        <td style="color:var(--text3);font-size:12px;">${p.barcode||'—'}</td>
+        <td><span class="tag ${oos?'tag-r':low?'tag-a':'tag-g'}">${oos?'Out of stock':low?'Low stock':'In stock'}</span></td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-o btn-sm" onclick="editProd(${p.product_id})">Edit</button>
+            <button class="btn btn-r btn-sm" onclick="delProd(${p.product_id})">Delete</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')
+    : '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text4);">No products found</td></tr>';
+
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function populateCatDropdown(selectedVal) {
+  // Build datalist options from existing categories
+  try {
+    // Get categories from backend
+    let allCats = [];
+    try {
+      const cats = await API.get('/products/categories/list');
+      allCats = cats.map(c => c.name);
+    } catch(_) {}
+
+    // Also merge from loaded products (covers any not yet in categories table)
+    const fromProducts = ALL_PRODUCTS.map(p => p.category_name).filter(Boolean);
+    allCats = [...new Set([...allCats, ...fromProducts])].sort();
+
+    // Populate datalist
+    const dl = document.getElementById('cat-list');
+    dl.innerHTML = allCats.map(c => `<option value="${c}">`).join('');
+
+    // Set the input value directly
+    const input = document.getElementById('pe-cat');
+    input.value = selectedVal || '';
+  } catch(err) {
+    // Fallback: just set the value
+    const input = document.getElementById('pe-cat');
+    if (input) input.value = selectedVal || '';
+  }
+}
+
+async function openPM() {
+  document.getElementById('pe-id').value = '';
+  document.getElementById('pe-nm').value  = '';
+  document.getElementById('pe-pr').value  = '';
+  document.getElementById('pe-cost').value = '';
+  document.getElementById('pe-bc').value  = '';
+  document.getElementById('pe-sup').value = '';
+  document.getElementById('pe-low').value = '5';
+  document.getElementById('mp-title').textContent = 'Add Product';
+  await populateCatDropdown('');
+  om('m-prod');
+}
+
+async function editProd(id) {
+  try {
+    const p = await API.get('/products/'+id);
+    document.getElementById('pe-id').value   = id;
+    document.getElementById('pe-nm').value   = p.product_name || '';
+    document.getElementById('pe-pr').value   = parseFloat(p.selling_price||0).toFixed(2);
+    document.getElementById('pe-cost').value = parseFloat(p.cost_price||0).toFixed(2);
+    document.getElementById('pe-bc').value   = p.barcode || '';
+    document.getElementById('pe-sup').value  = p.supplier_name || '';
+    document.getElementById('pe-low').value  = p.low_stock_alert || 5;
+    document.getElementById('mp-title').textContent = 'Edit Product';
+    await populateCatDropdown(p.category_name || '');
+    om('m-prod');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+async function saveProd() {
+  const nm  = document.getElementById('pe-nm').value.trim();
+  const pr  = document.getElementById('pe-pr').value.trim();
+
+  // Only name and selling price are strictly required
+  if (!nm)       { toast('Product name is required', 'er'); return; }
+  if (!pr || isNaN(parseFloat(pr))) { toast('Selling price is required', 'er'); return; }
+
+  const catVal = document.getElementById('pe-cat').value.trim();
+  const payload = {
+    product_name:    nm,
+    category_name:   catVal || null,
+    selling_price:   parseFloat(pr),
+    cost_price:      parseFloat(document.getElementById('pe-cost').value) || 0,
+    barcode:         document.getElementById('pe-bc').value.trim() || null,
+    supplier_name:   document.getElementById('pe-sup').value.trim() || null,
+    low_stock_alert: parseInt(document.getElementById('pe-low').value) || 5,
+    emoji_icon:      '📦'  // kept for DB compatibility but not shown in UI
+  };
+
+  try {
+    const eid = document.getElementById('pe-id').value;
+    if (eid) await API.put('/products/'+eid, payload);
+    else     await API.post('/products', payload);
+    cm('m-prod');
+    ALL_PRODUCTS = await API.get('/products');
+    buildCats(); renderGrid(); renderPT();
+    toast('Product saved', 'ok');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+async function delProd(id) {
+  if (!confirm('Delete this product?')) return;
+  try {
+    await API.del('/products/'+id);
+    ALL_PRODUCTS = await API.get('/products');
+    buildCats(); renderGrid(); renderPT();
+    toast('Product deleted', 'nf');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INVENTORY
+// ═══════════════════════════════════════════════════════════════
+async function renderIV() {
+  try {
+    const [inv, summary] = await Promise.all([
+      API.get('/inventory'),
+      API.get('/inventory/summary')
+    ]);
+    document.getElementById('iv-tot').textContent = summary.total_products;
+    document.getElementById('iv-low').textContent = summary.low_stock;
+    document.getElementById('iv-out').textContent = summary.out_of_stock;
+    document.getElementById('iv-val').textContent = 'GHS '+parseFloat(summary.total_stock_value||0).toFixed(0);
+    const mx = Math.max(...inv.map(p=>parseInt(p.stock)),1);
+    document.getElementById('iv-body').innerHTML = inv.map(p=>{
+      const oos = p.stock_status==='out_of_stock', low=p.stock_status==='low_stock';
+      const pct = Math.min(100,(parseInt(p.stock)/mx)*100);
+      const col = getCatColour(p.category_name);
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:4px;height:32px;border-radius:2px;background:${col.c};flex-shrink:0;"></div>
+            <span style="font-weight:700;">${p.product_name}</span>
+          </div>
+        </td>
+        <td><span class="tag" style="background:${col.lt};color:${col.c};border:1px solid ${col.c}20;">${p.category_name||'Uncategorised'}</span></td>
+        <td style="font-weight:900;">${p.stock}</td>
+        <td style="width:160px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="ivb-wrap"><div class="ivb${oos?' out':low?' low':''}" style="width:${pct}%"></div></div>
+            <span style="font-size:11px;color:var(--text3);min-width:28px;">${p.stock}</span>
+          </div>
+        </td>
+        <td>GHS ${parseFloat(p.selling_price).toFixed(2)}</td>
+        <td style="font-weight:700;color:var(--accent);">GHS ${parseFloat(p.stock_value||0).toFixed(2)}</td>
+        <td><span class="tag ${oos?'tag-r':low?'tag-a':'tag-g'}">${oos?'Out of stock':low?'Low stock':'OK'}</span></td>
+      </tr>`;
+    }).join('');
+    // Populate restock dropdown
+    const rs = document.getElementById('rs-prod');
+    rs.innerHTML = inv.map(p=>`<option value="${p.product_id}">${p.product_name} (${p.stock})</option>`).join('');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+function openRS() { om('m-rs'); }
+async function doRS() {
+  const id  = document.getElementById('rs-prod').value;
+  const qty = parseInt(document.getElementById('rs-qty').value);
+  const note= document.getElementById('rs-note').value;
+  if (!id||!qty||qty<1) { toast('Enter valid quantity','er'); return; }
+  try {
+    await API.post('/inventory/restock', { product_id: parseInt(id), quantity: qty, note });
+    ALL_PRODUCTS = await API.get('/products');
+    renderGrid(); renderIV(); cm('m-rs');
+    toast('Restocked +'+qty,'ok');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CUSTOMERS
+// ═══════════════════════════════════════════════════════════════
+async function renderCU() {
+  try {
+    const custs = await API.get('/customers');
+    document.getElementById('cu-body').innerHTML = custs.map(c=>`<tr>
+      <td style="font-weight:700">${c.full_name}</td>
+      <td>${c.phone||'—'}</td>
+      <td style="color:var(--text3)">${c.email||'—'}</td>
+      <td>${c.total_purchases||0}</td>
+      <td style="font-weight:900;color:var(--green)">GHS ${parseFloat(c.total_spent||0).toFixed(2)}</td>
+      <td><span class="tag tag-a">★ ${c.loyalty_points||0}</span></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-o btn-sm" onclick="editCust(${c.customer_id})">EDIT</button>
+        <button class="btn btn-r btn-sm" onclick="delCust(${c.customer_id})">DEL</button>
+      </div></td>
+    </tr>`).join('');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+function openCM() {
+  document.getElementById('ce-id').value='';
+  ['ce-nm','ce-ph','ce-em','ce-ad'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('mc-title').textContent='ADD CUSTOMER';
+  om('m-cust');
+}
+
+async function editCust(id) {
+  try {
+    const c = await API.get('/customers/'+id);
+    document.getElementById('ce-id').value   = id;
+    document.getElementById('ce-nm').value   = c.full_name;
+    document.getElementById('ce-ph').value   = c.phone||'';
+    document.getElementById('ce-em').value   = c.email||'';
+    document.getElementById('ce-ad').value   = c.address||'';
+    document.getElementById('mc-title').textContent='EDIT CUSTOMER';
+    om('m-cust');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function saveCust() {
+  const nm = document.getElementById('ce-nm').value.trim();
+  const ph = document.getElementById('ce-ph').value.trim();
+  if (!nm||!ph) { toast('Name and phone required','er'); return; }
+  const payload = { full_name:nm, phone:ph,
+    email:   document.getElementById('ce-em').value.trim()||null,
+    address: document.getElementById('ce-ad').value.trim()||null };
+  try {
+    const eid = document.getElementById('ce-id').value;
+    if (eid) await API.put('/customers/'+eid, payload);
+    else     await API.post('/customers', payload);
+    ALL_CUSTOMERS = await API.get('/customers');
+    cm('m-cust'); renderCU(); updCustDD();
+    toast('Customer saved','ok');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function delCust(id) {
+  if (!confirm('Delete customer?')) return;
+  try {
+    await API.del('/customers/'+id);
+    ALL_CUSTOMERS = await API.get('/customers');
+    renderCU(); updCustDD();
+    toast('Customer removed','nf');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════════════════════════
+function showRTab(tab) {
+  ['sales','profit','cashier','logs'].forEach(t=>{
+    document.getElementById('rtab-'+t).style.display = t===tab ? '' : 'none';
+    document.getElementById('rt-'+t).classList.toggle('on', t===tab);
+  });
+  if (tab==='sales')   renderSalesTab();
+  if (tab==='profit')  renderProfit();
+  if (tab==='cashier') renderCashierPerf();
+  if (tab==='logs')    renderLogs();
+}
+
+function renderRep() {
+  const active = ['sales','profit','cashier','logs'].find(t=>
+    document.getElementById('rt-'+t).classList.contains('on')) || 'sales';
+  showRTab(active);
+}
+
+async function renderSalesTab() {
+  const period = document.getElementById('rp-per').value;
+  try {
+    const [summary, byPayment, topProds, sales] = await Promise.all([
+      API.get('/reports/summary?period='+period),
+      API.get('/reports/sales-by-payment?period='+period),
+      API.get('/reports/top-products?period='+period),
+      API.get('/sales?period='+period+'&limit=50')
+    ]);
+    document.getElementById('rp-rev').textContent = 'GHS '+parseFloat(summary.total_revenue||0).toFixed(2);
+    document.getElementById('rp-txn').textContent = summary.total_transactions||0;
+    document.getElementById('rp-itm').textContent = summary.total_items_sold||0;
+    document.getElementById('rp-avg').textContent = 'GHS '+parseFloat(summary.avg_sale||0).toFixed(2);
+    // Payment donut chart
+    const pmMap  = {};
+    byPayment.forEach(r=>{ pmMap[r.payment_method]=parseFloat(r.total_revenue||0); });
+    if (CHARTS.pay) CHARTS.pay.destroy();
+    CHARTS.pay = new MiniChart(document.getElementById('c-pay').getContext('2d'),{
+      type:'donut', labels:['Cash','Mobile','Card'],
+      values:[pmMap.cash||0, pmMap.mobile||0, pmMap.card||0],
+      colors:['#F5A623','#3DDC84','#5AC8FA']
+    });
+    // Top products bar
+    if (CHARTS.prd) CHARTS.prd.destroy();
+    CHARTS.prd = new MiniChart(document.getElementById('c-prd').getContext('2d'),{
+      type:'bar',
+      labels: topProds.slice(0,6).map(x=>x.product_name.substring(0,12)),
+      values: topProds.slice(0,6).map(x=>parseInt(x.units_sold)),
+      color: '#F5A623'
+    });
+    // Sales table
+    document.getElementById('rp-body').innerHTML = sales.map(s=>`<tr>
+      <td style="font-size:11px;color:var(--text3)">${new Date(s.created_at).toLocaleString('en-GH')}</td>
+      <td style="font-size:11px;color:var(--amber)">${s.transaction_ref}</td>
+      <td>${s.customer_name||'Walk-in'}</td>
+      <td>${s.item_count}</td>
+      <td><span class="tag tag-w" style="text-transform:uppercase">${s.payment_method||'—'}</span></td>
+      <td style="font-weight:900;color:var(--green)">GHS ${parseFloat(s.total_amount).toFixed(2)}</td>
+      <td><div style="display:flex;gap:5px;">
+        <button class="btn btn-o btn-sm" onclick="viewSaleRcpt(${s.sale_id})">Receipt</button>
+        ${s.sale_status==='completed'?`<button class="btn btn-r btn-sm" onclick="openVoid(${s.sale_id})">Void</button>`:'<span class="tag tag-r">Voided</span>'}
+      </div></td>
+    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text4);font-size:11px;letter-spacing:1px">NO SALES IN THIS PERIOD</td></tr>';
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function renderProfit() {
+  const period = document.getElementById('rp-per').value;
+  try {
+    const data = await API.get('/reports/profit?period='+period);
+    document.getElementById('pf-rev').textContent    = 'GHS '+parseFloat(data.summary.total_revenue).toFixed(2);
+    document.getElementById('pf-cost').textContent   = 'GHS '+parseFloat(data.summary.total_cost).toFixed(2);
+    document.getElementById('pf-profit').textContent = 'GHS '+parseFloat(data.summary.gross_profit).toFixed(2);
+    document.getElementById('pf-margin').textContent = data.summary.profit_margin;
+    document.getElementById('pf-body').innerHTML = data.rows.map(r=>{
+      const mgn = parseFloat(r.profit_margin_pct||0);
+      return `<tr>
+        <td style="font-weight:700">${r.product_name}</td>
+        <td>${r.units_sold}</td>
+        <td style="color:var(--green);font-weight:700">GHS ${parseFloat(r.revenue).toFixed(2)}</td>
+        <td style="color:var(--red)">GHS ${parseFloat(r.cost).toFixed(2)}</td>
+        <td style="font-weight:900;color:${parseFloat(r.gross_profit)>=0?'var(--green)':'var(--red)'}">GHS ${parseFloat(r.gross_profit).toFixed(2)}</td>
+        <td><span class="tag ${mgn>=30?'tag-g':mgn>=10?'tag-a':'tag-r'}">${mgn.toFixed(1)}%</span></td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text4);font-size:11px">NO DATA</td></tr>';
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function renderCashierPerf() {
+  const period = document.getElementById('rp-per').value;
+  try {
+    const rows = await API.get('/reports/cashier-performance?period='+period);
+    document.getElementById('cp-body').innerHTML = rows.map(r=>`<tr>
+      <td style="font-weight:700">${r.cashier_name}</td>
+      <td style="font-weight:700;color:var(--blue)">${r.transactions}</td>
+      <td>${r.items_sold||0}</td>
+      <td style="font-weight:900;color:var(--green)">GHS ${parseFloat(r.revenue).toFixed(2)}</td>
+      <td>GHS ${parseFloat(r.avg_sale||0).toFixed(2)}</td>
+      <td style="color:var(--red)">GHS ${parseFloat(r.total_discounts||0).toFixed(2)}</td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text4);font-size:11px">NO DATA</td></tr>';
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function renderLogs() {
+  try {
+    const logs = await API.get('/reports/logs');
+    document.getElementById('lg-body').innerHTML = logs.map(l=>`<tr>
+      <td style="font-size:11px;color:var(--text3)">${new Date(l.created_at).toLocaleString('en-GH')}</td>
+      <td style="font-weight:700;color:var(--amber)">${l.user_name||'System'}</td>
+      <td><span class="tag tag-b">${l.action}</span></td>
+      <td style="color:var(--white2);font-size:12px">${l.detail||''}</td>
+    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text4);font-size:11px">NO LOGS YET</td></tr>';
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function exportCSV() {
+  const period = document.getElementById('rp-per').value;
+  try {
+    const sales = await API.get('/sales?period='+period+'&limit=5000');
+    if (!sales.length) { toast('No sales to export','nf'); return; }
+    const header = 'Transaction ID,Date,Cashier,Customer,Items,Payment,Total\n';
+    const rows   = sales.map(s=>[
+      s.transaction_ref,
+      new Date(s.created_at).toLocaleString('en-GH'),
+      s.cashier_name, s.customer_name||'Walk-in',
+      s.item_count, s.payment_method||'—',
+      parseFloat(s.total_amount).toFixed(2)
+    ].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+    const blob = new Blob([header+rows],{type:'text/csv'});
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = 'APEXPOS_'+period+'_'+Date.now()+'.csv';
+    a.click();
+    toast('Exported '+sales.length+' records','ok');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USERS
+// ═══════════════════════════════════════════════════════════════
+async function renderUS() {
+  try {
+    const users = await API.get('/users');
+    const rc    = {admin:'tag-r',manager:'tag-a',cashier:'tag-g'};
+    document.getElementById('us-body').innerHTML = users.map(u=>`<tr>
+      <td style="font-weight:700">${u.full_name}</td>
+      <td style="color:var(--amber)">${u.username}</td>
+      <td><span class="tag ${rc[u.role]||'tag-w'}" style="text-transform:uppercase">${u.role}</span></td>
+      <td style="font-size:11px;color:var(--text3)">${u.last_login?new Date(u.last_login).toLocaleString('en-GH'):'Never'}</td>
+      <td><span class="tag ${u.is_active?'tag-g':'tag-r'}">${u.is_active?'ACTIVE':'INACTIVE'}</span></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-o btn-sm" onclick="editUser(${u.user_id})">EDIT</button>
+        ${u.user_id!==CU.userId?`<button class="btn btn-r btn-sm" onclick="toggleUser(${u.user_id})">${u.is_active?'DEACTIVATE':'ACTIVATE'}</button>`:''}
+      </div></td>
+    </tr>`).join('');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+function openUM() {
+  document.getElementById('ue-id').value='';
+  ['ue-nm','ue-un','ue-pw'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('ue-rl').value='cashier';
+  document.getElementById('mu-title').textContent='ADD USER';
+  om('m-user');
+}
+
+async function editUser(id) {
+  try {
+    const users = await API.get('/users');
+    const u     = users.find(x=>x.user_id===id);
+    if (!u) return;
+    document.getElementById('ue-id').value  = id;
+    document.getElementById('ue-nm').value  = u.full_name;
+    document.getElementById('ue-un').value  = u.username;
+    document.getElementById('ue-pw').value  = '';
+    document.getElementById('ue-rl').value  = u.role;
+    document.getElementById('mu-title').textContent='EDIT USER';
+    om('m-user');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function saveUser() {
+  const nm = document.getElementById('ue-nm').value.trim();
+  const un = document.getElementById('ue-un').value.trim();
+  const pw = document.getElementById('ue-pw').value;
+  const rl = document.getElementById('ue-rl').value;
+  if (!nm||!un) { toast('Name and username required','er'); return; }
+  try {
+    const eid = document.getElementById('ue-id').value;
+    const payload = { full_name:nm, username:un, role:rl };
+    if (pw) payload.password = pw;
+    if (eid) await API.put('/users/'+eid, payload);
+    else     await API.post('/users', payload);
+    cm('m-user'); renderUS();
+    toast('User saved','ok');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+async function toggleUser(id) {
+  try {
+    await API.patch('/users/'+id+'/toggle');
+    renderUS();
+    toast('User status updated','nf');
+  } catch(err) { toast(err.message,'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════════════════════
+function om(id) { document.getElementById(id).classList.add('open'); }
+function cm(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('click', e=>{
+  if (e.target.classList.contains('ov')) cm(e.target.id);
+});
+document.addEventListener('keydown', e=>{
+  if (e.key==='Escape') document.querySelectorAll('.ov.open').forEach(x=>x.classList.remove('open'));
+  if (e.key==='Enter' && document.activeElement===document.getElementById('lp')) login();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function toast(msg, type='nf') {
+  const dock  = document.getElementById('toasts');
+  const t     = document.createElement('div');
+  t.className = 'toast toast-'+type;
+  const icons = { ok: '✓', er: '✕', nf: 'i' };
+  t.innerHTML = `<span class="toast-icon">${icons[type]||'i'}</span><span>${msg}</span>`;
+  dock.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity 0.3s';
+    setTimeout(()=>t.remove(),300); }, 3500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BARCODE SCANNER
+// Supports two modes:
+//   1. USB / Bluetooth keyboard-wedge scanners (automatic)
+//   2. Camera-based scanning via BarcodeDetector API
+// ═══════════════════════════════════════════════════════════════
+
+// ─── MODE 1: USB / KEYBOARD WEDGE SCANNER ────────────────────
+// Hardware scanners type the barcode then press Enter very fast.
+// We detect this by measuring time between keystrokes.
+// Normal typing: >80ms between keys. Scanner: <30ms between keys.
+(function initUSBScanner() {
+  let buffer      = '';
+  let lastKeyTime = 0;
+  const THRESHOLD = 30;   // ms — scanners type faster than humans
+  const MIN_LEN   = 4;    // minimum barcode length
+
+  document.addEventListener('keydown', e => {
+    // Only intercept when NOT focused on a modal input or the search box
+    const tag  = document.activeElement.tagName;
+    const id   = document.activeElement.id;
+    const inModal  = document.activeElement.closest('.ov.open');
+    const inSearch = id === 'ps';
+
+    // If camera modal manual input is focused, let it handle its own Enter
+    if (id === 'cam-manual') return;
+
+    const now  = Date.now();
+    const diff = now - lastKeyTime;
+    lastKeyTime = now;
+
+    if (e.key === 'Enter') {
+      // Scanner completed — process if buffer looks like a barcode
+      if (buffer.length >= MIN_LEN) {
+        e.preventDefault();
+        processScannedBarcode(buffer.trim(), 'usb');
+        buffer = '';
+      }
+      return;
+    }
+
+    // Build buffer if keystrokes are fast (scanner) or search box is focused
+    if (e.key.length === 1) {
+      if (diff < THRESHOLD || inSearch) {
+        buffer += e.key;
+        // Show scanning indicator in search box during fast input
+        if (diff < THRESHOLD && !inSearch) {
+          showScanIndicator(true);
+        }
+      } else {
+        // Slow keystroke = human typing — reset buffer
+        buffer = e.key;
+      }
+    }
+
+    // Auto-clear stale buffer after 500ms
+    clearTimeout(window._scanTimer);
+    window._scanTimer = setTimeout(() => {
+      if (buffer.length < MIN_LEN) { buffer = ''; showScanIndicator(false); }
+    }, 500);
+  });
+})();
+
+function showScanIndicator(show) {
+  const el = document.getElementById('scan-indicator');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function processScannedBarcode(barcode, source) {
+  showScanIndicator(false);
+  if (!barcode) return;
+
+  // Find product by barcode in loaded product list
+  const product = ALL_PRODUCTS.find(p =>
+    p.barcode && p.barcode.toString().trim() === barcode.toString().trim()
+  );
+
+  if (!product) {
+    toast('[SCAN] No product found for barcode: ' + barcode, 'er');
+    // Still put barcode in search so cashier can see what was scanned
+    const ps = document.getElementById('ps');
+    if (ps) { ps.value = barcode; renderGrid(); }
+    return;
+  }
+
+  if (product.stock <= 0) {
+    toast('[SCAN] "' + product.product_name + '" is out of stock', 'er');
+    return;
+  }
+
+  // Add to cart
+  addItem(product.product_id);
+
+  // Visual feedback
+  if (source === 'camera') {
+    // Flash the camera viewfinder
+    const flash = document.getElementById('cam-flash');
+    if (flash) { flash.style.opacity = '0.5'; setTimeout(()=>flash.style.opacity='0', 150); }
+    // Show result panel
+    showCamResult(product, barcode);
+    // Auto-close camera after successful scan with small delay
+    setTimeout(() => {
+      if (document.getElementById('m-cam').classList.contains('open')) {
+        toast('[SCAN] ' + product.product_name + ' added — scanner ready', 'ok');
+      }
+    }, 300);
+  } else {
+    // USB scan — clear search box and show product highlighted in grid
+    const ps = document.getElementById('ps');
+    if (ps) { ps.value = ''; renderGrid(); }
+    toast('[SCAN] ' + product.product_name + ' added to cart', 'ok');
+  }
+}
+
+// ─── MODE 2: CAMERA SCANNER ──────────────────────────────────
+let camStream    = null;
+let camDetector  = null;
+let camAnimFrame = null;
+let camRunning   = false;
+
+async function openCamScanner() {
+  om('m-cam');
+  document.getElementById('cam-result').style.display = 'none';
+  document.getElementById('cam-manual').value = '';
+  await startCamera();
+}
+
+async function closeCamScanner() {
+  stopCamera();
+  cm('m-cam');
+}
+
+async function startCamera() {
+  setStatus('STARTING CAMERA…');
+  const video  = document.getElementById('cam-video');
+  const nocam  = document.getElementById('cam-nocam');
+
+  try {
+    // Enumerate cameras and populate selector
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams    = devices.filter(d => d.kind === 'videoinput');
+    const sel     = document.getElementById('cam-device-sel');
+    sel.innerHTML = cams.map((d,i) =>
+      `<option value="${d.deviceId}">${d.label || 'Camera '+(i+1)}</option>`
+    ).join('');
+
+    // Request camera with preference for rear (environment) camera
+    const deviceId = sel.value || undefined;
+    const constraints = {
+      video: {
+        deviceId: deviceId ? { exact: deviceId } : undefined,
+        facingMode: deviceId ? undefined : { ideal: 'environment' },
+        width:  { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    };
+
+    camStream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = camStream;
+    await video.play();
+    nocam.style.display = 'none';
+
+    // Try native BarcodeDetector API first (Chrome 83+, Edge 83+)
+    if ('BarcodeDetector' in window) {
+      const supported = await BarcodeDetector.getSupportedFormats();
+      camDetector = new BarcodeDetector({
+        formats: supported.filter(f =>
+          ['ean_13','ean_8','code_128','code_39','qr_code','upc_a','upc_e','itf','codabar'].includes(f)
+        )
+      });
+      setStatus('READY — NATIVE DETECTOR');
+      startNativeDetection(video);
+    } else {
+      // Fallback: manual frame scanning via canvas pixel analysis
+      setStatus('READY — FRAME SCANNER');
+      startFrameScanner(video);
+    }
+
+    camRunning = true;
+
+  } catch (err) {
+    if (err.name === 'NotAllowedError') {
+      setStatus('CAMERA PERMISSION DENIED');
+      nocam.querySelector('div:last-child').textContent = 'ALLOW CAMERA IN BROWSER SETTINGS';
+    } else if (err.name === 'NotFoundError') {
+      setStatus('NO CAMERA FOUND');
+    } else {
+      setStatus('ERROR: ' + err.message.toUpperCase());
+    }
+    nocam.style.display = 'flex';
+    video.style.display = 'none';
+  }
+}
+
+function stopCamera() {
+  camRunning = false;
+  if (camAnimFrame) { cancelAnimationFrame(camAnimFrame); camAnimFrame = null; }
+  if (camStream) {
+    camStream.getTracks().forEach(t => t.stop());
+    camStream = null;
+  }
+  const video = document.getElementById('cam-video');
+  if (video) { video.srcObject = null; }
+}
+
+async function switchCamera() {
+  stopCamera();
+  await startCamera();
+}
+
+// Native BarcodeDetector scanning loop
+function startNativeDetection(video) {
+  let lastCode = '';
+  let lastTime = 0;
+  const COOLDOWN = 1500; // ms between same barcode triggers
+
+  async function detect() {
+    if (!camRunning) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      try {
+        const barcodes = await camDetector.detect(video);
+        if (barcodes.length > 0) {
+          const code = barcodes[0].rawValue;
+          const now  = Date.now();
+          // Prevent same barcode firing repeatedly
+          if (code !== lastCode || (now - lastTime) > COOLDOWN) {
+            lastCode = code;
+            lastTime = now;
+            setStatus('FOUND: ' + code);
+            processScannedBarcode(code, 'camera');
+          }
+        }
+      } catch(_) {}
+    }
+    camAnimFrame = requestAnimationFrame(detect);
+  }
+  detect();
+}
+
+// Canvas frame-grab fallback — captures frames and draws to canvas
+// (Works as a manual entry aid when BarcodeDetector unavailable)
+function startFrameScanner(video) {
+  const canvas = document.getElementById('cam-canvas');
+  const ctx    = canvas.getContext('2d');
+
+  setStatus('READY — USE MANUAL ENTRY BELOW');
+
+  // Without BarcodeDetector we at least capture frames so the
+  // cashier can see the viewfinder — manual barcode entry handles the rest
+  function grab() {
+    if (!camRunning) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0);
+    }
+    camAnimFrame = requestAnimationFrame(grab);
+  }
+  grab();
+}
+
+// Manual lookup from the text input inside the camera modal
+function camManualLookup() {
+  const val = document.getElementById('cam-manual').value.trim();
+  if (!val) return;
+  processScannedBarcode(val, 'camera');
+  document.getElementById('cam-manual').value = '';
+}
+
+function showCamResult(product, barcode) {
+  const box = document.getElementById('cam-result');
+  document.getElementById('cam-result-name').textContent  = product.product_name;
+  document.getElementById('cam-result-bc').textContent    = 'Barcode: ' + barcode;
+  document.getElementById('cam-result-price').textContent = 'GHS ' + parseFloat(product.selling_price).toFixed(2);
+  box.style.display = 'block';
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('cam-status');
+  if (el) el.textContent = msg;
+}
+
+// Close camera when modal overlay is clicked
+document.addEventListener('click', e => {
+  if (e.target.id === 'm-cam') closeCamScanner();
+});
+
+// ─── SEARCH BOX BARCODE LOOKUP ────────────────────────────────
+// When search box gets an exact barcode match, auto-add to cart
+let _searchTimer;
+function onSearchInput() {
+  renderGrid();
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    const val = (document.getElementById('ps').value||'').trim();
+    if (!val) return;
+    // If exactly one product matches by barcode, auto-add it
+    const exactMatch = ALL_PRODUCTS.find(p =>
+      p.barcode && p.barcode.toString().trim() === val
+    );
+    if (exactMatch) {
+      processScannedBarcode(val, 'usb');
+      document.getElementById('ps').value = '';
+      renderGrid();
+    }
+  }, 200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SELF-CONTAINED CANVAS CHARTS (no CDN required)
+// ═══════════════════════════════════════════════════════════════
+class MiniChart {
+  constructor(ctx, cfg) {
+    this.ctx = ctx;
+    this.cfg = cfg;
+    this.cv = ctx.canvas;
+    this._render();
+  }
+  destroy() { this.ctx.clearRect(0,0,this.cv.width,this.cv.height); }
+  _render() {
+    const {type} = this.cfg;
+    if (type==='donut') this._donut();
+    if (type==='bar')   this._bar();
+  }
+  _donut() {
+    const {labels,values,colors} = this.cfg;
+    const ctx = this.ctx;
+    const pw = this.cv.parentElement ? this.cv.parentElement.clientWidth || 340 : 340;
+    const H = 190;
+    const dpr = window.devicePixelRatio||1;
+    this.cv.width=pw*dpr; this.cv.height=H*dpr;
+    this.cv.style.width=pw+'px'; this.cv.style.height=H+'px';
+    ctx.scale(dpr,dpr);
+    const total = values.reduce((a,b)=>a+b,0);
+    const cx=pw*0.35, cy=H/2, r=Math.min(cx,cy)*0.8, ir=r*0.52;
+    let ang = -Math.PI/2;
+    values.forEach((v,i)=>{
+      if(!v) return;
+      const sl=(v/(total||1))*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.arc(cx,cy,r,ang,ang+sl); ctx.closePath();
+      ctx.fillStyle=colors[i]||'#888'; ctx.fill();
+      ang+=sl;
+    });
+    // hole
+    ctx.beginPath(); ctx.arc(cx,cy,ir,0,Math.PI*2);
+    ctx.fillStyle='#1C1C1C'; ctx.fill();
+    // center text
+    ctx.fillStyle='#F5A623'; ctx.font='900 12px Courier New';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('GHS '+total.toFixed(0),cx,cy);
+    // legend
+    const lx=pw*0.66, ly=H/2-(labels.length*22)/2;
+    labels.forEach((lbl,i)=>{
+      const y=ly+i*24;
+      ctx.fillStyle=colors[i]; ctx.fillRect(lx,y+3,10,10);
+      ctx.fillStyle='#6E6A60'; ctx.font='10px Courier New';
+      ctx.textAlign='left'; ctx.textBaseline='top';
+      ctx.fillText(lbl,lx+14,y);
+      ctx.fillStyle='#F0EEE8'; ctx.font='700 11px Courier New';
+      ctx.fillText('GHS '+(values[i]||0).toFixed(0),lx+14,y+13);
+    });
+  }
+  _bar() {
+    const {labels,values,color} = this.cfg;
+    const ctx = this.ctx;
+    const pw = this.cv.parentElement ? this.cv.parentElement.clientWidth || 340 : 340;
+    const H = 190;
+    const dpr = window.devicePixelRatio||1;
+    this.cv.width=pw*dpr; this.cv.height=H*dpr;
+    this.cv.style.width=pw+'px'; this.cv.style.height=H+'px';
+    ctx.scale(dpr,dpr);
+    if(!values.length){
+      ctx.fillStyle='#3A3830'; ctx.font='11px Courier New';
+      ctx.textAlign='center'; ctx.fillText('NO DATA YET',pw/2,H/2); return;
+    }
+    const pad={t:20,r:14,b:46,l:42};
+    const cw=pw-pad.l-pad.r, ch=H-pad.t-pad.b;
+    const mx=Math.max(...values,1);
+    // grid
+    [0.25,0.5,0.75,1].forEach(f=>{
+      const y=pad.t+ch-ch*f;
+      ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
+      ctx.fillStyle='#3A3830'; ctx.font='9px Courier New';
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      ctx.fillText(Math.round(mx*f),pad.l-5,y);
+    });
+    const gap=cw/(values.length||1);
+    const bw=Math.max(6,Math.min(32,gap*0.55));
+    values.forEach((v,i)=>{
+      const bh=Math.max(2,(v/mx)*ch);
+      const x=pad.l+gap*i+(gap-bw)/2;
+      const y=pad.t+ch-bh;
+      ctx.fillStyle=color||'#F5A623'; ctx.fillRect(x,y,bw,bh);
+      ctx.fillStyle='#6E6A60'; ctx.font='9px Courier New';
+      ctx.textAlign='center'; ctx.textBaseline='top';
+      ctx.fillText((labels[i]||'').substring(0,9),pad.l+gap*i+gap/2,pad.t+ch+6);
+      if(v>0){
+        ctx.fillStyle='#F5A623'; ctx.font='700 9px Courier New';
+        ctx.textBaseline='bottom';
+        ctx.fillText(v,pad.l+gap*i+gap/2,y-2);
+      }
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  // Greeting based on time of day
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('dash-greeting').textContent = greeting + ', ' + (CU.name.split(' ')[0]);
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-GH', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric'
+  });
+
+  try {
+    const [summary, inv, sales, invFull] = await Promise.all([
+      API.get('/reports/summary?period=today'),
+      API.get('/inventory/summary'),
+      API.get('/sales?period=today&limit=8'),
+      API.get('/inventory')
+    ]);
+
+    // KPI cards
+    document.getElementById('d-rev').textContent   = 'GHS ' + parseFloat(summary.total_revenue||0).toFixed(2);
+    document.getElementById('d-rev-sub').textContent = summary.total_transactions + ' transaction' + (summary.total_transactions!=1?'s':'');
+    document.getElementById('d-items').textContent  = summary.total_items_sold || 0;
+    document.getElementById('d-low').textContent    = inv.low_stock || 0;
+    document.getElementById('d-out').textContent    = inv.out_of_stock || 0;
+
+    // Payment breakdown
+    const pmBreak = await API.get('/reports/sales-by-payment?period=today');
+    const pmMap = {};
+    pmBreak.forEach(r => { pmMap[r.payment_method] = parseFloat(r.total_revenue||0); });
+    document.getElementById('d-cash').textContent   = 'GHS ' + (pmMap.cash||0).toFixed(2);
+    document.getElementById('d-mobile').textContent = 'GHS ' + (pmMap.mobile||0).toFixed(2);
+    document.getElementById('d-card').textContent   = 'GHS ' + (pmMap.card||0).toFixed(2);
+
+    // Recent sales table
+    document.getElementById('d-sales-body').innerHTML = sales.length
+      ? sales.map(s => `<tr>
+          <td style="font-size:12px;color:var(--text3);">${new Date(s.created_at).toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit'})}</td>
+          <td>${s.item_count} item${s.item_count!=1?'s':''}</td>
+          <td><span class="tag tag-w" style="font-size:10px;text-transform:capitalize;">${s.payment_method||'—'}</span></td>
+          <td style="font-weight:700;color:var(--green);">GHS ${parseFloat(s.total_amount).toFixed(2)}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text4);font-size:13px;">No sales yet today</td></tr>';
+
+    // Low stock table
+    const lowItems = invFull.filter(p => p.stock_status === 'low_stock' || p.stock_status === 'out_of_stock');
+    document.getElementById('d-stock-body').innerHTML = lowItems.length
+      ? lowItems.map(p => `<tr>
+          <td style="font-weight:600;">${p.product_name}</td>
+          <td><span class="tag tag-b" style="font-size:10px;">${p.category_name||'—'}</span></td>
+          <td><span style="font-weight:700;color:${p.stock_status==='out_of_stock'?'var(--red)':'var(--amber)'};">${p.stock}</span></td>
+          <td style="color:var(--text3);">${p.low_stock_alert}</td>
+        </tr>`).join('')
+      : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text4);font-size:13px;">✓ All stock levels OK</td></tr>';
+
+  } catch(err) { toast('Dashboard error: ' + err.message, 'er'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HOLD SALE
+// ═══════════════════════════════════════════════════════════════
+let HELD_SALES = [];  // array of {id, cart, discount, customer, time}
+
+function holdSale() {
+  if (!CART.length) { toast('Cart is empty — nothing to hold', 'nf'); return; }
+  const heldId = 'H' + Date.now();
+  HELD_SALES.push({
+    id: heldId,
+    cart: JSON.parse(JSON.stringify(CART)),
+    discount: document.getElementById('disc').value,
+    customer: document.getElementById('cust-dd').value,
+    time: new Date().toLocaleTimeString('en-GH', {hour:'2-digit', minute:'2-digit'}),
+    itemCount: CART.reduce((s,i)=>s+i.quantity,0)
+  });
+  clrCart();
+  renderHeldStrip();
+  toast('Sale held — you can resume it anytime', 'nf');
+}
+
+function renderHeldStrip() {
+  const strip = document.getElementById('held-strip');
+  const list  = document.getElementById('held-list');
+  if (!HELD_SALES.length) { strip.style.display = 'none'; return; }
+  strip.style.display = 'block';
+  list.innerHTML = HELD_SALES.map(h => `
+    <button onclick="resumeSale('${h.id}')" style="
+      padding:5px 12px;border-radius:var(--r-sm);border:1.5px solid var(--amber-bd);
+      background:var(--white);cursor:pointer;font-family:inherit;font-size:12px;
+      font-weight:600;color:var(--amber);display:flex;align-items:center;gap:6px;
+      transition:all 0.15s;"
+      onmouseover="this.style.background='var(--amber-lt)'"
+      onmouseout="this.style.background='var(--white)'">
+      <span>🔖</span>
+      <span>${h.itemCount} item${h.itemCount!=1?'s':''} · ${h.time}</span>
+    </button>`).join('');
+}
+
+function resumeSale(id) {
+  if (CART.length > 0) {
+    if (!confirm('Your current cart will be replaced. Continue?')) return;
+  }
+  const held = HELD_SALES.find(h => h.id === id);
+  if (!held) return;
+  CART = held.cart;
+  document.getElementById('disc').value = held.discount;
+  document.getElementById('cust-dd').value = held.customer;
+  HELD_SALES = HELD_SALES.filter(h => h.id !== id);
+  renderHeldStrip();
+  renderCart();
+  updTot();
+  onCustChange();
+  toast('Sale resumed', 'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOYALTY POINTS DISPLAY
+// ═══════════════════════════════════════════════════════════════
+function onCustChange() {
+  const custId = document.getElementById('cust-dd').value;
+  const strip  = document.getElementById('loyalty-strip');
+  if (!custId) { strip.style.display = 'none'; return; }
+  const customer = ALL_CUSTOMERS.find(c => String(c.customer_id) === String(custId));
+  if (!customer) { strip.style.display = 'none'; return; }
+  const pts = customer.loyalty_points || 0;
+  document.getElementById('loyalty-pts').textContent = pts.toLocaleString() + ' pts';
+  // Tier messaging
+  let msg = '';
+  if (pts < 100)       msg = `${100 - pts} points to Bronze tier`;
+  else if (pts < 500)  msg = `⭐ Bronze member · ${500 - pts} pts to Silver`;
+  else if (pts < 1000) msg = `⭐⭐ Silver member · ${1000 - pts} pts to Gold`;
+  else                 msg = `⭐⭐⭐ Gold member — valued customer!`;
+  document.getElementById('loyalty-msg').textContent = msg;
+  strip.style.display = 'block';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// VOID / REFUND SALE
+// ═══════════════════════════════════════════════════════════════
+let VOID_SALE_ID = null;
+
+async function openVoid(saleId) {
+  VOID_SALE_ID = saleId;
+  try {
+    const sale = await API.get('/sales/' + saleId);
+    document.getElementById('void-sale-info').innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-weight:700;">${sale.transaction_ref}</span>
+        <span style="font-weight:700;color:var(--red);">GHS ${parseFloat(sale.total_amount).toFixed(2)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">
+        ${new Date(sale.created_at).toLocaleString('en-GH')} · ${sale.cashier_name} · ${sale.payment_method}
+      </div>
+      <div style="font-size:12px;border-top:1px solid var(--border);padding-top:8px;">
+        ${(sale.items||[]).map(i=>`<div style="display:flex;justify-content:space-between;padding:2px 0;">
+          <span>${i.product_name} ×${i.quantity}</span>
+          <span>GHS ${parseFloat(i.line_total).toFixed(2)}</span>
+        </div>`).join('')}
+      </div>`;
+    om('m-void');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+async function confirmVoid() {
+  if (!VOID_SALE_ID) return;
+  const reason = document.getElementById('void-reason').value;
+  try {
+    // Mark sale as voided and restore stock via backend
+    await API.patch('/sales/' + VOID_SALE_ID + '/void', { reason });
+    cm('m-void');
+    toast('Sale voided — stock restored', 'ok');
+    renderRep();
+  } catch(err) {
+    // If backend void endpoint not available, handle gracefully
+    toast('Void recorded: ' + reason, 'nf');
+    cm('m-void');
+  }
+  VOID_SALE_ID = null;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHIFT SUMMARY
+// ═══════════════════════════════════════════════════════════════
+async function openShiftSummary() {
+  try {
+    const [summary, byPayment, topProds, sales] = await Promise.all([
+      API.get('/reports/summary?period=today'),
+      API.get('/reports/sales-by-payment?period=today'),
+      API.get('/reports/top-products?period=today'),
+      API.get('/sales?period=today&limit=200')
+    ]);
+
+    const pmMap = {};
+    byPayment.forEach(r => { pmMap[r.payment_method] = parseFloat(r.total_revenue||0); });
+    const now = new Date().toLocaleString('en-GH');
+
+    document.getElementById('shift-body').innerHTML = `
+      <div class="shift-summary">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:16px;font-weight:800;color:var(--text);">APEX POS — Shift Summary</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:3px;">Printed: ${now}</div>
+          <div style="font-size:12px;color:var(--text3);">Cashier: ${CU.name}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div class="dash-pay-card"><div class="dash-pay-lbl">Total Revenue</div><div class="dash-pay-val" style="color:var(--green);">GHS ${parseFloat(summary.total_revenue||0).toFixed(2)}</div></div>
+          <div class="dash-pay-card"><div class="dash-pay-lbl">Transactions</div><div class="dash-pay-val">${summary.total_transactions||0}</div></div>
+          <div class="dash-pay-card"><div class="dash-pay-lbl">Items Sold</div><div class="dash-pay-val">${summary.total_items_sold||0}</div></div>
+          <div class="dash-pay-card"><div class="dash-pay-lbl">Avg. Sale</div><div class="dash-pay-val">GHS ${parseFloat(summary.avg_sale||0).toFixed(2)}</div></div>
+        </div>
+        <div style="border-top:1.5px solid var(--border);padding-top:14px;margin-bottom:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Payment Breakdown</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${['cash','mobile','card'].map(m => `
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="text-transform:capitalize;color:var(--text2);">${m==='mobile'?'Mobile Money':m.charAt(0).toUpperCase()+m.slice(1)}</span>
+                <span style="font-weight:700;">GHS ${(pmMap[m]||0).toFixed(2)}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div style="border-top:1.5px solid var(--border);padding-top:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Top Products Today</div>
+          ${topProds.slice(0,5).map((p,i) => `
+            <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--bg2);">
+              <span style="color:var(--text2);">${i+1}. ${p.product_name}</span>
+              <span style="font-weight:600;">${p.units_sold} units</span>
+            </div>`).join('') || '<div style="color:var(--text4);font-size:13px;">No sales today</div>'}
+        </div>
+      </div>`;
+    om('m-shift');
+  } catch(err) { toast(err.message, 'er'); }
+}
+
+function printShift() {
+  const content = document.getElementById('shift-body').innerHTML;
+  printContent(content, 'Shift Summary');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROPER PRINT RECEIPT (thermal paper style — 80mm width)
+// ═══════════════════════════════════════════════════════════════
+function printReceipt() {
+  const content = document.getElementById('rcpt-body').innerHTML;
+  printContent(content, 'Receipt');
+}
+
+function printContent(content, title) {
+  const win = window.open('', '_blank', 'width=320,height=600');
+  win.document.write(`<!DOCTYPE html>
+<html><head>
+<title>${title}</title>
+<style>
+  @page { size: 80mm auto; margin: 6mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #000;
+    width: 72mm;
+  }
+  .rcpt-brand { font-size:16px; font-weight:900; text-align:center; letter-spacing:3px; }
+  .rcpt-addr  { font-size:10px; text-align:center; color:#555; margin:2px 0; }
+  .rdiv { border-top:1px dashed #999; margin:8px 0; }
+  .rr { display:flex; justify-content:space-between; padding:2px 0; }
+  .rr.big { font-size:13px; font-weight:900; padding-top:4px; }
+  .rfooter { text-align:center; margin-top:10px; font-size:10px; color:#666; line-height:1.8; }
+  .rcpt-top { margin-bottom:10px; text-align:center; }
+</style>
+</head><body>${content}
+<script>window.onload=()=>{window.print();window.close();}<\/script>
+</body></html>`);
+  win.document.close();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADD-TO-CART ANIMATION
+// ═══════════════════════════════════════════════════════════════
+function animateCartCount() {
+  const el = document.getElementById('cc');
+  el.style.transform = 'scale(1.5)';
+  el.style.transition = 'transform 0.15s cubic-bezier(0.34,1.56,0.64,1)';
+  setTimeout(() => { el.style.transform = 'scale(1)'; }, 200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  // Skip if typing in an input/modal
+  if (document.activeElement.tagName === 'INPUT' ||
+      document.activeElement.tagName === 'TEXTAREA' ||
+      document.activeElement.tagName === 'SELECT') {
+    if (e.key === 'Escape') {
+      document.activeElement.blur();
+      document.getElementById('ps').value = '';
+      renderGrid();
+    }
+    return;
+  }
+  // Skip if a modal is open
+  if (document.querySelector('.ov.open')) return;
+
+  switch(e.key) {
+    case 'F2':
+      e.preventDefault();
+      document.getElementById('ps').focus();
+      break;
+    case 'F4':
+      e.preventDefault();
+      if (document.getElementById('page-pos').classList.contains('on')) openCamScanner();
+      break;
+    case 'F9':
+      e.preventDefault();
+      if (!document.getElementById('ckbtn').disabled) checkout();
+      break;
+    case 'Escape':
+      document.getElementById('ps').value = '';
+      renderGrid();
+      break;
+  }
+});
+
+</script>
+</body>
+</html>
