@@ -1232,14 +1232,30 @@ async function checkoutMoMo(phone) {
     MOMO_REF = result.reference;
 
     setMomoStep('send', 'done');
-    setMomoStep('wait', 'active');
-    document.getElementById('momo-live-status').textContent = result.message || 'Waiting for customer to approve…';
 
-    // Start countdown (5 minutes)
-    startMomoCountdown(300);
-
-    // Start polling every 5 seconds
-    MOMO_POLL_TIMER = setInterval(() => pollMomoStatus(tot), 5000);
+    // Handle different Paystack response statuses
+    if (result.status === 'send_otp') {
+      // Vodafone Cash sends an OTP the customer must enter
+      setMomoStep('wait', 'active');
+      document.getElementById('step-wait-sub').textContent = 'Customer received an OTP on their phone';
+      document.getElementById('momo-live-status').innerHTML = `
+        <div style="background:var(--accent-lt);border:1px solid var(--accent-bd);border-radius:var(--r-sm);padding:12px;margin-top:4px;">
+          <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">Enter OTP from customer's phone</div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="momo-otp-input" class="fi2" placeholder="Enter OTP" maxlength="6"
+              style="flex:1;font-size:16px;letter-spacing:4px;text-align:center;">
+            <button class="btn btn-a" onclick="submitMomoOtp()" style="white-space:nowrap;">Submit OTP</button>
+          </div>
+        </div>`;
+      startMomoCountdown(300);
+    } else {
+      // MTN / AirtelTigo — customer gets USSD prompt directly
+      setMomoStep('wait', 'active');
+      document.getElementById('momo-live-status').textContent = result.message || 'Waiting for customer to approve on their phone…';
+      // Start countdown and polling
+      startMomoCountdown(300);
+      MOMO_POLL_TIMER = setInterval(() => pollMomoStatus(tot), 5000);
+    }
 
   } catch(err) {
     cm('m-momo');
@@ -1317,6 +1333,45 @@ function retryMoMo() {
   MOMO_REF = null;
   const phone = document.getElementById('momo-phone').value.trim();
   if (phone) checkoutMoMo(phone);
+}
+
+async function submitMomoOtp() {
+  const otp = (document.getElementById('momo-otp-input')?.value || '').trim();
+  if (!otp) { toast('Enter the OTP first', 'er'); return; }
+  if (!MOMO_REF) { toast('No active payment reference', 'er'); return; }
+
+  document.getElementById('momo-live-status').innerHTML =
+    '<div style="color:var(--text3);font-size:13px;">Submitting OTP…</div>';
+
+  try {
+    const result = await API.post('/payments/mobile/submit-otp', {
+      otp, reference: MOMO_REF
+    });
+
+    if (result.status === 'success') {
+      // Payment confirmed immediately after OTP
+      clearInterval(MOMO_POLL_TIMER); MOMO_POLL_TIMER = null;
+      clearInterval(MOMO_COUNTDOWN);  MOMO_COUNTDOWN  = null;
+      setMomoStep('wait', 'done');
+      setMomoStep('done', 'done');
+      document.getElementById('step-done-title').textContent = '✓ Payment confirmed!';
+      document.getElementById('step-done-sub').textContent   = 'OTP verified successfully';
+      document.getElementById('momo-live-status').textContent = '';
+      document.getElementById('momo-timeout-note').style.display = 'none';
+      document.getElementById('momo-footer').innerHTML =
+        `<button class="btn btn-a" onclick="momoComplete()">Complete Sale →</button>`;
+      toast('Mobile Money payment confirmed!', 'ok');
+    } else {
+      // OTP submitted — now start polling for final confirmation
+      document.getElementById('momo-live-status').textContent = result.message || 'OTP submitted — waiting for confirmation…';
+      if (!MOMO_POLL_TIMER) {
+        MOMO_POLL_TIMER = setInterval(() => pollMomoStatus(0), 5000);
+      }
+    }
+  } catch(err) {
+    document.getElementById('momo-live-status').textContent = 'OTP submission failed: ' + err.message;
+    toast(err.message, 'er');
+  }
 }
 
 function showManualMomoFallback(tot) {
