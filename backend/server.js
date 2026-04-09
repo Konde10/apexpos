@@ -36,7 +36,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', version: '1.0.0', time: new Date() });
 });
 
+<<<<<<< HEAD
 // ─── Catch-all — serve frontend ──────────────────────────────
+=======
+// ─── Catch-all ────────────────────────────────────────────────
+>>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
@@ -46,6 +50,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
+<<<<<<< HEAD
 // ─── Start server locally / export for Vercel ─────────────────
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
@@ -55,3 +60,9 @@ if (require.main === module) {
 }
 
 module.exports = app;
+=======
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`\n🚀  APEX POS running at http://localhost:${PORT}\n`);
+});
+>>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)

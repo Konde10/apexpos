@@ -171,9 +171,17 @@ router.get('/daily-sales', async (req, res) => {
 
 // ─── GET /api/reports/logs ────────────────────────────────────
 router.get('/logs', async (req, res) => {
+<<<<<<< HEAD
   try {
     const [rows] = await db.query(
       'SELECT * FROM transaction_logs ORDER BY created_at DESC LIMIT 200'
+=======
+  const period = req.query.period || 'all';
+  const where  = periodClause(period, 'tl');
+  try {
+    const [rows] = await db.query(
+      `SELECT * FROM transaction_logs tl WHERE ${where} ORDER BY created_at DESC LIMIT 500`
+>>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     );
     res.json(rows);
   } catch (err) {
