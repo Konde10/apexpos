@@ -12,19 +12,11 @@
 <div id="auth">
   <div class="auth-card">
     <div class="auth-top">
-<<<<<<< HEAD
-      <div class="auth-logo-line">
-        <div class="auth-logo-name">APEX POS</div>
-        <div class="auth-logo-ver">v3.0</div>
-      </div>
-      <div class="auth-logo-sub">Point of Sale System</div>
-=======
       <div class="auth-logo-wrap">
         <div class="auth-logo-mark">A</div>
         <div class="auth-logo-name">APEX POS</div>
       </div>
       <div class="auth-logo-sub">Point of Sale System · v3.0</div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     </div>
     <div class="auth-body">
       <div class="fg"><label class="fl">Username</label><input class="fi" id="lu" value="admin" placeholder="username"></div>
@@ -36,11 +28,7 @@
           <option value="cashier">Cashier</option>
         </select>
       </div>
-<<<<<<< HEAD
-      <button class="auth-btn" onclick="login()">[ SIGN IN ]</button>
-=======
       <button class="auth-btn" onclick="login()">Sign In</button>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
       <div class="auth-hint">
         <b>DEMO —</b> admin / admin123 &nbsp;|&nbsp; manager / mgr123 &nbsp;|&nbsp; cashier / cash123
       </div>
@@ -185,25 +173,15 @@
           </div>
         </div>
         <!-- Held sales strip -->
-<<<<<<< HEAD
-        <div id="held-strip" style="display:none;padding:7px 14px;background:var(--amber-lt);border-bottom:1px solid var(--amber-bd);">
-          <div style="font-size:11px;font-weight:700;color:var(--amber);margin-bottom:5px;letter-spacing:0.3px;">HELD SALES</div>
-=======
         <div id="held-strip" style="display:none;padding:7px 14px;background:var(--gold-lt);border-bottom:1px solid var(--gold-bd);">
           <div style="font-size:10px;font-weight:800;color:var(--gold);margin-bottom:5px;letter-spacing:1px;text-transform:uppercase;">On Hold</div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
           <div id="held-list" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
         </div>
         <div class="cart-items" id="citems">
           <div class="cart-empty">
-<<<<<<< HEAD
-            <div class="cart-empty-ico">▣</div>
-            <div class="cart-empty-txt">Cart empty</div>
-=======
             <div class="cart-empty-ico">🛒</div>
             <div class="cart-empty-txt">Cart is empty</div>
             <div class="cart-empty-sub">Click a product to add it</div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
           </div>
         </div>
         <div class="cart-ft">
@@ -230,11 +208,7 @@
             <div class="tr" id="t-chg-row" style="display:none;padding-top:5px;border-top:1px solid var(--wire2);margin-top:3px;"><span class="tr-lbl" style="color:var(--green);">CHANGE</span><span class="tr-val" id="t-chg" style="color:var(--green);">GHS 0.00</span></div>
           </div>
           <div>
-<<<<<<< HEAD
-            <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:7px;">Payment Method</div>
-=======
             <div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:0.8px;">Payment Method</div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
             <div class="pmths">
               <button class="pm sel" id="pm-cash" onclick="selPm('cash')">💵 Cash</button>
               <button class="pm" id="pm-mobile" onclick="selPm('mobile')">📱 Mobile Money</button>
@@ -339,11 +313,7 @@
           <div class="sub">Sales performance and revenue data</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-<<<<<<< HEAD
-          <select class="fsel2" id="rp-per" onchange="renderRep()" style="width:auto;">
-=======
           <select id="rp-per" onchange="renderRep()">
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
             <option value="today">Today</option>
             <option value="week" selected>This Week</option>
             <option value="month">This Month</option>
@@ -374,19 +344,11 @@
           <div class="charts-g">
             <div class="cb">
               <div class="cb-ttl">Payment Method Breakdown</div>
-<<<<<<< HEAD
-              <canvas id="c-pay" height="200"></canvas>
-            </div>
-            <div class="cb">
-              <div class="cb-ttl">Top Products — Units Sold</div>
-              <canvas id="c-prd" height="200"></canvas>
-=======
               <canvas id="c-pay" style="display:block;width:100%;"></canvas>
             </div>
             <div class="cb">
               <div class="cb-ttl">Top Products — Units Sold</div>
               <canvas id="c-prd" style="display:block;width:100%;"></canvas>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
             </div>
           </div>
           <div>
@@ -506,9 +468,6 @@
         <div class="fg2"><label class="fl2">Supplier</label><input class="fi2" id="pe-sup" placeholder="Supplier name"></div>
         <div class="fg2"><label class="fl2">Selling Price (GHS) *</label><input type="number" class="fi2" id="pe-pr" placeholder="0.00" min="0" step="0.01"></div>
         <div class="fg2"><label class="fl2">Cost Price (GHS)</label><input type="number" class="fi2" id="pe-cost" placeholder="0.00" min="0" step="0.01"></div>
-<<<<<<< HEAD
-        <div class="fg2"><label class="fl2">Barcode</label><input class="fi2" id="pe-bc" placeholder="e.g. 1234567890"></div>
-=======
         <div class="fg2">
           <label class="fl2">Barcode</label>
           <div class="barcode-input-wrap">
@@ -528,7 +487,6 @@
             Ready — point scanner at barcode and scan now
           </div>
         </div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
         <div class="fg2"><label class="fl2">Low Stock Alert Qty</label><input type="number" class="fi2" id="pe-low" placeholder="5" min="0"></div>
       </div>
       <div style="font-size:12px;color:var(--text3);padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border);">
@@ -611,11 +569,7 @@
       <h2>Receipt</h2>
       <button class="mb-x" onclick="cm('m-rcpt')">✕</button>
     </div>
-<<<<<<< HEAD
-    <div style="padding:24px;background:#F9F9F7;" id="rcpt-body"></div>
-=======
     <div style="padding:24px;background:var(--bg);" id="rcpt-body"></div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     <div class="mb-ft">
       <button class="btn btn-o" onclick="cm('m-rcpt')">Close</button>
       <button class="btn btn-g" onclick="printReceipt()">🖨 Print Receipt</button>
@@ -723,16 +677,6 @@
       </div>
 
       <!-- Last scanned result -->
-<<<<<<< HEAD
-      <div id="cam-result" style="display:none;background:var(--navy);border:1px solid var(--amber-bd);padding:12px 14px;">
-        <div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;margin-bottom:6px;">LAST SCAN</div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div>
-            <div id="cam-result-name" style="font-size:13px;font-weight:900;color:var(--white);"></div>
-            <div id="cam-result-bc" style="font-size:10px;color:var(--text3);margin-top:2px;"></div>
-          </div>
-          <div id="cam-result-price" style="font-size:14px;font-weight:900;color:var(--amber);white-space:nowrap;"></div>
-=======
       <div id="cam-result" style="display:none;background:var(--forest-lt);border:1.5px solid var(--forest-bd);border-radius:var(--r-sm);padding:12px 14px;">
         <div style="font-size:9px;font-weight:700;color:var(--forest);letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase;">Last Scan</div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -741,7 +685,6 @@
             <div id="cam-result-bc" style="font-size:11px;color:var(--text3);margin-top:2px;letter-spacing:0.5px;font-family:'JetBrains Mono',monospace;"></div>
           </div>
           <div id="cam-result-price" style="font-size:16px;font-weight:800;color:var(--forest);white-space:nowrap;font-family:'Outfit',sans-serif;"></div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
         </div>
       </div>
     </div>
@@ -762,13 +705,8 @@
 
       <!-- Network + amount header -->
       <div style="background:var(--bg);border-radius:var(--r);padding:16px;text-align:center;">
-<<<<<<< HEAD
-        <div id="momo-modal-network" style="font-size:13px;font-weight:600;color:var(--text3);margin-bottom:4px;"></div>
-        <div id="momo-modal-amount" style="font-size:28px;font-weight:800;color:var(--text);letter-spacing:-0.5px;"></div>
-=======
         <div id="momo-modal-network" style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px;letter-spacing:0.8px;text-transform:uppercase;"></div>
         <div id="momo-modal-amount" style="font-size:30px;font-weight:900;color:var(--forest);letter-spacing:-0.5px;font-family:'Outfit',sans-serif;"></div>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
         <div id="momo-modal-phone" style="font-size:13px;color:var(--text3);margin-top:4px;"></div>
       </div>
 
@@ -1224,30 +1162,19 @@ async function completeSale(paystackRef) {
 
 // ═══════════════════════════════════════════════════════════════
 // PAYSTACK MOBILE MONEY INTEGRATION
-<<<<<<< HEAD
-// Supports: MTN MoMo, Vodafone Cash, AirtelTigo Money
-=======
 // Supports: MTN MoMo, Telecel Cash (formerly Vodafone), AirtelTigo Money
 // Paystack provider codes: mtn | telecel | tigo
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
 // ═══════════════════════════════════════════════════════════════
 let MOMO_REF       = null;
 let MOMO_POLL_TIMER = null;
 let MOMO_COUNTDOWN = null;
 let MOMO_CANCELLED = false;
 
-<<<<<<< HEAD
-const NETWORK_INFO = {
-  mtn:  { name: 'MTN Mobile Money',    colour: '#FFC107', prefixes: ['024','054','055','059','025'] },
-  vod:  { name: 'Vodafone Cash',       colour: '#E30614', prefixes: ['020','050'] },
-  atl:  { name: 'AirtelTigo Money',    colour: '#E2001A', prefixes: ['027','057','026','056'] },
-=======
 // Paystack official provider codes: mtn | vod | atl
 const NETWORK_INFO = {
   mtn: { name: 'MTN Mobile Money', colour: '#FFC107', prefixes: ['024','054','055','059','025'] },
   vod: { name: 'Telecel Cash',     colour: '#E30614', prefixes: ['020','050'] },
   atl: { name: 'AirtelTigo Money', colour: '#E2001A', prefixes: ['027','057','026','056'] },
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
 };
 
 function detectMomoNetwork() {
@@ -1647,10 +1574,7 @@ async function openPM() {
   document.getElementById('pe-sup').value = '';
   document.getElementById('pe-low').value = '5';
   document.getElementById('mp-title').textContent = 'Add Product';
-<<<<<<< HEAD
-=======
   cancelProductBarcodeScan();
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
   await populateCatDropdown('');
   om('m-prod');
 }
@@ -1876,48 +1800,28 @@ async function renderSalesTab() {
     byPayment.forEach(r=>{ pmMap[r.payment_method]=parseFloat(r.total_revenue||0); });
     if (CHARTS.pay) CHARTS.pay.destroy();
     CHARTS.pay = new MiniChart(document.getElementById('c-pay').getContext('2d'),{
-<<<<<<< HEAD
-      type:'donut', labels:['Cash','Mobile','Card'],
-      values:[pmMap.cash||0, pmMap.mobile||0, pmMap.card||0],
-      colors:['#F5A623','#3DDC84','#5AC8FA']
-=======
       type:'donut',
       labels: ['Cash','Mobile Money','Card'],
       values: [pmMap.cash||0, pmMap.mobile||0, pmMap.card||0],
       colors: ['#1A5C38','#B8760A','#1860A0']
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     });
     // Top products bar
     if (CHARTS.prd) CHARTS.prd.destroy();
     CHARTS.prd = new MiniChart(document.getElementById('c-prd').getContext('2d'),{
       type:'bar',
-<<<<<<< HEAD
-      labels: topProds.slice(0,6).map(x=>x.product_name.substring(0,12)),
-      values: topProds.slice(0,6).map(x=>parseInt(x.units_sold)),
-      color: '#F5A623'
-=======
       labels: topProds.slice(0,10).map(x=>x.product_name),
       values: topProds.slice(0,10).map(x=>parseInt(x.units_sold||0)),
       color: '#1A5C38'
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     });
     // Sales table
     document.getElementById('rp-body').innerHTML = sales.map(s=>`<tr>
       <td style="font-size:11px;color:var(--text3)">${new Date(s.created_at).toLocaleString('en-GH')}</td>
-<<<<<<< HEAD
-      <td style="font-size:11px;color:var(--amber)">${s.transaction_ref}</td>
-      <td>${s.customer_name||'Walk-in'}</td>
-      <td>${s.item_count}</td>
-      <td><span class="tag tag-w" style="text-transform:uppercase">${s.payment_method||'—'}</span></td>
-      <td style="font-weight:900;color:var(--green)">GHS ${parseFloat(s.total_amount).toFixed(2)}</td>
-=======
       <td style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3);">${s.transaction_ref}</td>
       <td>${s.customer_name||'Walk-in'}</td>
       <td>${s.item_count}</td>
       <td><span class="tag tag-w" style="text-transform:uppercase">${s.payment_method||'—'}</span></td>
       <td style="font-weight:800;color:var(--forest);font-family:'Outfit',sans-serif;">
         GHS ${parseFloat(s.total_amount).toFixed(2)}</td>
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
       <td><div style="display:flex;gap:5px;">
         <button class="btn btn-o btn-sm" onclick="viewSaleRcpt(${s.sale_id})">Receipt</button>
         ${s.sale_status==='completed'?`<button class="btn btn-r btn-sm" onclick="openVoid(${s.sale_id})">Void</button>`:'<span class="tag tag-r">Voided</span>'}
@@ -1964,16 +1868,6 @@ async function renderCashierPerf() {
 }
 
 async function renderLogs() {
-<<<<<<< HEAD
-  try {
-    const logs = await API.get('/reports/logs');
-    document.getElementById('lg-body').innerHTML = logs.map(l=>`<tr>
-      <td style="font-size:11px;color:var(--text3)">${new Date(l.created_at).toLocaleString('en-GH')}</td>
-      <td style="font-weight:700;color:var(--amber)">${l.user_name||'System'}</td>
-      <td><span class="tag tag-b">${l.action}</span></td>
-      <td style="color:var(--white2);font-size:12px">${l.detail||''}</td>
-    </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--text4);font-size:11px">NO LOGS YET</td></tr>';
-=======
   const period = document.getElementById('rp-per').value;
   try {
     const logs = await API.get('/reports/logs?period='+period);
@@ -1995,7 +1889,6 @@ async function renderLogs() {
       </tr>`;
     }).join('')
     : '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text4);font-size:13px;">No activity in this period</td></tr>';
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
   } catch(err) { toast(err.message,'er'); }
 }
 
@@ -2094,15 +1987,11 @@ async function toggleUser(id) {
 // MODAL HELPERS
 // ═══════════════════════════════════════════════════════════════
 function om(id) { document.getElementById(id).classList.add('open'); }
-<<<<<<< HEAD
-function cm(id) { document.getElementById(id).classList.remove('open'); }
-=======
 function cm(id) {
   document.getElementById(id).classList.remove('open');
   // Cancel product barcode capture when product modal closes
   if (id === 'm-prod') cancelProductBarcodeScan();
 }
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
 document.addEventListener('click', e=>{
   if (e.target.classList.contains('ov')) cm(e.target.id);
 });
@@ -2136,8 +2025,6 @@ function toast(msg, type='nf') {
 // Hardware scanners type the barcode then press Enter very fast.
 // We detect this by measuring time between keystrokes.
 // Normal typing: >80ms between keys. Scanner: <30ms between keys.
-<<<<<<< HEAD
-=======
 // ─── USB / KEYBOARD-WEDGE SCANNER STATE ─────────────────────
 // Tracks whether we're in "product barcode capture" mode for the Add Product modal
 let PRODUCT_BC_CAPTURE = false;
@@ -2179,7 +2066,6 @@ function handleProductBarcodeScan(barcode) {
   toast('Barcode captured: ' + barcode.trim(), 'ok');
 }
 
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
 (function initUSBScanner() {
   let buffer      = '';
   let lastKeyTime = 0;
@@ -2187,17 +2073,6 @@ function handleProductBarcodeScan(barcode) {
   const MIN_LEN   = 4;    // minimum barcode length
 
   document.addEventListener('keydown', e => {
-<<<<<<< HEAD
-    // Only intercept when NOT focused on a modal input or the search box
-    const tag  = document.activeElement.tagName;
-    const id   = document.activeElement.id;
-    const inModal  = document.activeElement.closest('.ov.open');
-    const inSearch = id === 'ps';
-
-    // If camera modal manual input is focused, let it handle its own Enter
-    if (id === 'cam-manual') return;
-
-=======
     const id       = document.activeElement.id;
     const inSearch = id === 'ps';
 
@@ -2240,16 +2115,11 @@ function handleProductBarcodeScan(barcode) {
                          ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
     if (inModalInput && !inSearch) return;
 
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     const now  = Date.now();
     const diff = now - lastKeyTime;
     lastKeyTime = now;
 
     if (e.key === 'Enter') {
-<<<<<<< HEAD
-      // Scanner completed — process if buffer looks like a barcode
-=======
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
       if (buffer.length >= MIN_LEN) {
         e.preventDefault();
         processScannedBarcode(buffer.trim(), 'usb');
@@ -2258,32 +2128,15 @@ function handleProductBarcodeScan(barcode) {
       return;
     }
 
-<<<<<<< HEAD
-    // Build buffer if keystrokes are fast (scanner) or search box is focused
-    if (e.key.length === 1) {
-      if (diff < THRESHOLD || inSearch) {
-        buffer += e.key;
-        // Show scanning indicator in search box during fast input
-        if (diff < THRESHOLD && !inSearch) {
-          showScanIndicator(true);
-        }
-      } else {
-        // Slow keystroke = human typing — reset buffer
-=======
     if (e.key.length === 1) {
       if (diff < THRESHOLD || inSearch) {
         buffer += e.key;
         if (diff < THRESHOLD && !inSearch) showScanIndicator(true);
       } else {
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
         buffer = e.key;
       }
     }
 
-<<<<<<< HEAD
-    // Auto-clear stale buffer after 500ms
-=======
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
     clearTimeout(window._scanTimer);
     window._scanTimer = setTimeout(() => {
       if (buffer.length < MIN_LEN) { buffer = ''; showScanIndicator(false); }
@@ -2537,101 +2390,6 @@ function onSearchInput() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-<<<<<<< HEAD
-// SELF-CONTAINED CANVAS CHARTS (no CDN required)
-// ═══════════════════════════════════════════════════════════════
-class MiniChart {
-  constructor(ctx, cfg) {
-    this.ctx = ctx;
-    this.cfg = cfg;
-    this.cv = ctx.canvas;
-    this._render();
-  }
-  destroy() { this.ctx.clearRect(0,0,this.cv.width,this.cv.height); }
-  _render() {
-    const {type} = this.cfg;
-    if (type==='donut') this._donut();
-    if (type==='bar')   this._bar();
-  }
-  _donut() {
-    const {labels,values,colors} = this.cfg;
-    const ctx = this.ctx;
-    const pw = this.cv.parentElement ? this.cv.parentElement.clientWidth || 340 : 340;
-    const H = 190;
-    const dpr = window.devicePixelRatio||1;
-    this.cv.width=pw*dpr; this.cv.height=H*dpr;
-    this.cv.style.width=pw+'px'; this.cv.style.height=H+'px';
-    ctx.scale(dpr,dpr);
-    const total = values.reduce((a,b)=>a+b,0);
-    const cx=pw*0.35, cy=H/2, r=Math.min(cx,cy)*0.8, ir=r*0.52;
-    let ang = -Math.PI/2;
-    values.forEach((v,i)=>{
-      if(!v) return;
-      const sl=(v/(total||1))*Math.PI*2;
-      ctx.beginPath(); ctx.moveTo(cx,cy);
-      ctx.arc(cx,cy,r,ang,ang+sl); ctx.closePath();
-      ctx.fillStyle=colors[i]||'#888'; ctx.fill();
-      ang+=sl;
-    });
-    // hole
-    ctx.beginPath(); ctx.arc(cx,cy,ir,0,Math.PI*2);
-    ctx.fillStyle='#1C1C1C'; ctx.fill();
-    // center text
-    ctx.fillStyle='#F5A623'; ctx.font='900 12px Courier New';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('GHS '+total.toFixed(0),cx,cy);
-    // legend
-    const lx=pw*0.66, ly=H/2-(labels.length*22)/2;
-    labels.forEach((lbl,i)=>{
-      const y=ly+i*24;
-      ctx.fillStyle=colors[i]; ctx.fillRect(lx,y+3,10,10);
-      ctx.fillStyle='#6E6A60'; ctx.font='10px Courier New';
-      ctx.textAlign='left'; ctx.textBaseline='top';
-      ctx.fillText(lbl,lx+14,y);
-      ctx.fillStyle='#F0EEE8'; ctx.font='700 11px Courier New';
-      ctx.fillText('GHS '+(values[i]||0).toFixed(0),lx+14,y+13);
-    });
-  }
-  _bar() {
-    const {labels,values,color} = this.cfg;
-    const ctx = this.ctx;
-    const pw = this.cv.parentElement ? this.cv.parentElement.clientWidth || 340 : 340;
-    const H = 190;
-    const dpr = window.devicePixelRatio||1;
-    this.cv.width=pw*dpr; this.cv.height=H*dpr;
-    this.cv.style.width=pw+'px'; this.cv.style.height=H+'px';
-    ctx.scale(dpr,dpr);
-    if(!values.length){
-      ctx.fillStyle='#3A3830'; ctx.font='11px Courier New';
-      ctx.textAlign='center'; ctx.fillText('NO DATA YET',pw/2,H/2); return;
-    }
-    const pad={t:20,r:14,b:46,l:42};
-    const cw=pw-pad.l-pad.r, ch=H-pad.t-pad.b;
-    const mx=Math.max(...values,1);
-    // grid
-    [0.25,0.5,0.75,1].forEach(f=>{
-      const y=pad.t+ch-ch*f;
-      ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
-      ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+cw,y); ctx.stroke();
-      ctx.fillStyle='#3A3830'; ctx.font='9px Courier New';
-      ctx.textAlign='right'; ctx.textBaseline='middle';
-      ctx.fillText(Math.round(mx*f),pad.l-5,y);
-    });
-    const gap=cw/(values.length||1);
-    const bw=Math.max(6,Math.min(32,gap*0.55));
-    values.forEach((v,i)=>{
-      const bh=Math.max(2,(v/mx)*ch);
-      const x=pad.l+gap*i+(gap-bw)/2;
-      const y=pad.t+ch-bh;
-      ctx.fillStyle=color||'#F5A623'; ctx.fillRect(x,y,bw,bh);
-      ctx.fillStyle='#6E6A60'; ctx.font='9px Courier New';
-      ctx.textAlign='center'; ctx.textBaseline='top';
-      ctx.fillText((labels[i]||'').substring(0,9),pad.l+gap*i+gap/2,pad.t+ch+6);
-      if(v>0){
-        ctx.fillStyle='#F5A623'; ctx.font='700 9px Courier New';
-        ctx.textBaseline='bottom';
-        ctx.fillText(v,pad.l+gap*i+gap/2,y-2);
-=======
 // CANVAS CHARTS — adaptive, no clipping, any number of bars
 // ═══════════════════════════════════════════════════════════════
 class MiniChart {
@@ -2822,7 +2580,6 @@ class MiniChart {
         }
         ctx.fillText(line1 || lbl, lx, ly);
         if (line2) ctx.fillText(line2.substring(0, 13), lx, ly + 12);
->>>>>>> dcb268c (Fix: Paystack provider codes, adaptive charts, logs filter, UI polish)
       }
     });
   }
