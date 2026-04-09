@@ -14,7 +14,25 @@ app.post('/api/payments/webhook',
 );
 
 // ─── Middleware ───────────────────────────────────────────────
-app.use(cors({ origin: '*' }));
+const allowedOrigins = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+  /\.vercel\.app$/,
+  /\.railway\.app$/,
+];
+if (process.env.FRONTEND_URL) allowedOrigins.push(process.env.FRONTEND_URL);
+
+app.use(cors({
+  origin(origin, cb) {
+    // Allow requests with no origin (curl, Postman, same-origin)
+    if (!origin) return cb(null, true);
+    const ok = allowedOrigins.some(p =>
+      typeof p === 'string' ? p === origin : p.test(origin)
+    );
+    cb(ok ? null : new Error('CORS: origin not allowed'), ok);
+  },
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
